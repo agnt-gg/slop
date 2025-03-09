@@ -4,7 +4,7 @@ info:
   description: A SLOP pattern implementation with dynamic model endpoints
   version: 1.0.0
 servers:
-  - url: http://localhost:5000
+  - url: http://localhost:31337
     description: Local development server
 paths:
   /chat:
