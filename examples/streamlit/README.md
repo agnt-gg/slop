@@ -53,7 +53,7 @@ This is a Python implementation of the [SLOP pattern](https://github.com/agnt-gg
    ```bash
    make slop-flask
    ```
-   - This sources `vars.sh` and runs `slop_with_models.py` on `http://localhost:5000`.
+   - This sources `vars.sh` and runs `slop_with_models.py` on `http://localhost:31337`.
    - Logs will show model discovery (e.g., `Loaded models: [model1, endpoint_7:default]`).
 
 2. **Run the Streamlit App**:
@@ -92,7 +92,7 @@ This is a Python implementation of the [SLOP pattern](https://github.com/agnt-gg
 1. **Model Discovery**:
    - The Flask server scans `MODEL_ENDPOINT_0` to `MODEL_ENDPOINT_999` from `vars.sh`.
    - Queries each endpoint’s `/v1/models` using the OpenAI client.
-   - Maps model IDs to their respective clients, with fallbacks (e.g., `endpoint_X:default`) if `/v1/models` fails.
+   - Maps model IDs to their respective clients
 
 2. **API Endpoints**:
    - `/models`: Returns the list of discovered models.

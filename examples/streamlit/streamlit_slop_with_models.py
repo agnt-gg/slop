@@ -2,12 +2,15 @@
 import streamlit as st
 import requests
 
-BASE_URL = "http://localhost:5000"
+BASE_URL = "http://localhost:31337"
 
 
 def main():
     st.title("SLOP Streamlit with Dynamic Models")
-    st.markdown("[Explore API Documentation](/openapi/)", unsafe_allow_html=True)
+    st.markdown(
+        "[Explore API Documentation](http://localhost:31337/openapi/)",
+        unsafe_allow_html=True,
+    )
     page = st.sidebar.selectbox(
         "Choose a feature", ["Chat", "Tools", "Memory", "Resources", "Pay"]
     )

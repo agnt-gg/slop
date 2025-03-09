@@ -59,10 +59,9 @@ def initialize_model_map():
                 f"{endpoint_name} returned models: {[m.id for m in model_list]}"
             )
         except Exception as e:
-            logger.error(f"Failed to list models for {endpoint_name}: {str(e)}")
-            default_model = f"{endpoint_name}:default"
-            MODEL_CLIENT_MAP[default_model] = client
-            logger.info(f"Added fallback model '{default_model}'")
+            logger.error(
+                f"Skipping, Failed to list models for {endpoint_name}: {str(e)}"
+            )
             continue
         for m in model_list:
             model_id = m.id
@@ -218,4 +217,4 @@ def pay():
 
 if __name__ == "__main__":
     initialize_model_map()
-    app.run(debug=True)
+    app.run(debug=True, port=31337)
