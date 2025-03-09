@@ -1,0 +1,4 @@
+flask
+streamlit
+openai
+requests
