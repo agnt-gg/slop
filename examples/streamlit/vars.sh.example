@@ -1,0 +1,3 @@
+export MODEL_ENDPOINT_1=https://hermes.ai.unturf.com/v1
+export MODEL_ENDPOINT_2=https://node2.naptha.ai/inference
+export MODEL_ENDPOINT_3=https://node3.naptha.ai/inference
