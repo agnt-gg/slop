@@ -2,11 +2,4 @@ flask
 streamlit
 openai
 requests
-
-pydantic
-
-flask-openapi3
-
-# choose a frontend for openapi3 docs! /openapi route!
-# pip install -U flask-openapi3[swagger,redoc,rapidoc,rapipdf,scalar,elements] 
-flask-openapi3[swagger]
+flask_swagger_ui
