@@ -1,0 +1,5 @@
+flask
+streamlit
+openai
+requests
+flask_swagger_ui

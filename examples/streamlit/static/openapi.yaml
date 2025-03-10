@@ -1,0 +1,398 @@
+openapi: 3.0.0
+info:
+  title: SLOP API
+  description: A SLOP pattern implementation with dynamic model endpoints
+  version: 1.0.0
+servers:
+  - url: http://localhost:31337
+    description: Local development server
+paths:
+  /chat:
+    post:
+      summary: Send a message to an AI model
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response with AI message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '404':
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /models:
+    get:
+      summary: List available models
+      tags:
+        - Models
+      responses:
+        '200':
+          description: List of model IDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelsResponse'
+  /tools:
+    get:
+      summary: List available tools
+      tags:
+        - Tools
+      responses:
+        '200':
+          description: List of tools
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolsResponse'
+  /tools/{tool_id}:
+    post:
+      summary: Use a specific tool
+      tags:
+        - Tools
+      parameters:
+        - name: tool_id
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [calculator, greet]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolRequest'
+      responses:
+        '200':
+          description: Tool execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResponse'
+        '400':
+          description: Missing required parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Tool not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /memory:
+    get:
+      summary: List all memory keys
+      tags:
+        - Memory
+      responses:
+        '200':
+          description: List of memory keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryListResponse'
+    post:
+      summary: Store a key-value pair
+      tags:
+        - Memory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryStoreRequest'
+      responses:
+        '200':
+          description: Successfully stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStoreResponse'
+  /memory/{key}:
+    get:
+      summary: Retrieve a value by key
+      tags:
+        - Memory
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieved value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryGetResponse'
+    delete:
+      summary: Delete a memory key
+      tags:
+        - Memory
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStoreResponse'
+        '404':
+          description: Key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /resources:
+    get:
+      summary: List available resources
+      tags:
+        - Resources
+      responses:
+        '200':
+          description: List of resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourcesResponse'
+  /resources/{resource_id}:
+    get:
+      summary: Get a specific resource
+      tags:
+        - Resources
+      parameters:
+        - name: resource_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resource content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceResponse'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /pay:
+    post:
+      summary: Simulate a payment
+      tags:
+        - Pay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayRequest'
+      responses:
+        '200':
+          description: Payment simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayResponse'
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        model:
+          type: string
+          nullable: true
+      required:
+        - messages
+    Message:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+      required:
+        - role
+        - content
+    ChatResponse:
+      type: object
+      properties:
+        choices:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: object
+                properties:
+                  content:
+                    type: string
+            required:
+              - message
+      required:
+        - choices
+    ModelsResponse:
+      type: object
+      properties:
+        models:
+          type: array
+          items:
+            type: string
+      required:
+        - models
+    ToolsResponse:
+      type: object
+      properties:
+        tools:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              description:
+                type: string
+            required:
+              - id
+              - description
+      required:
+        - tools
+    ToolRequest:
+      type: object
+      properties:
+        expression:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+    ToolResponse:
+      type: object
+      properties:
+        result:
+          oneOf:
+            - type: string
+            - type: integer
+      required:
+        - result
+    MemoryStoreRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required:
+        - key
+        - value
+    MemoryStoreResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [stored, deleted]
+      required:
+        - status
+    MemoryGetResponse:
+      type: object
+      properties:
+        value:
+          type: string
+          nullable: true
+      required:
+        - value
+    MemoryListResponse:
+      type: object
+      properties:
+        keys:
+          type: array
+          items:
+            type: string
+      required:
+        - keys
+    ResourcesResponse:
+      type: object
+      properties:
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              content:
+                type: string
+            required:
+              - id
+              - content
+      required:
+        - resources
+    ResourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+      required:
+        - id
+        - content
+    PayRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+      required:
+        - amount
+    PayResponse:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+        status:
+          type: string
+          enum: [success]
+      required:
+        - transaction_id
+        - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
