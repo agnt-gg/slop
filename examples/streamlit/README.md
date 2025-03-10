@@ -7,7 +7,7 @@ This is a Python implementation of the [SLOP pattern](https://github.com/agnt-gg
 ## Features
 
 - **Chat**: Send messages to dynamically discovered AI models.
-- **Tools**: Use simple tools like a calculator and greeter. (broken, please help fix this)
+- **Tools**: Use simple tools like a calculator and greeter.
 - **Memory**: Store and retrieve key-value pairs.
 - **Resources**: Access predefined static content.
 - **Pay**: Simulate a payment transaction.
