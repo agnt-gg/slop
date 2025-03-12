@@ -6,6 +6,11 @@
 ![Streaming](https://img.shields.io/badge/Streaming-SSE-orange)
 ![Memory](https://img.shields.io/badge/Memory-Dynamic-purple)
 
+<div align="center">
+  <img src="https://github.com/agnt-gg/slop/blob/main/examples/javascript/advanced-examples/pdf-bot-with-stream/screenshot.PNG?raw=true" alt="SLOP PDF Bot Interface" width="800"/>
+  <p><em>SLOP PDF Bot with Dark Mode Interface and SLOPPY Mode Toggle</em></p>
+</div>
+
 ## 🛠️ Quick Installation
 
 ### Prerequisites
