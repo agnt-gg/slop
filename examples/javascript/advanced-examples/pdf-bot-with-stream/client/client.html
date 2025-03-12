@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOP Client</title>
+    <!-- Add Showdown library for Markdown to HTML conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    
+    <!-- Add KaTeX CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* if SLOPPY mode is enabled use comic sans, else league spartan */
+        }
+        body {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* if SLOPPY mode is enabled use comic sans, else league spartan */
+            line-height: 150%;
+            background: var(--color-black-navy, #070710);
+            color: var(--color-light-med-navy, #d1d1db);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: var(--color-blue, #12e0ff);
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 24px;
+        }
+        .upload-panel {
+            background-color: var(--color-dark-navy, #10101f);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: 1px solid var(--color-navy, #131322);
+        }
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .upload-form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .upload-btn {
+            background-color: var(--color-pink, #e53d8f);
+            color: var(--color-white, #f7f8f0);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .upload-btn:hover {
+            background-color: var(--color-blue, #12e0ff);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(18, 224, 255, 0.3);
+        }
+        .file-counter {
+            font-size: var(--font-size-sm, 14px);
+            color: var(--color-med-navy, #7f8193);
+        }
+        .upload-status {
+            margin-top: 10px;
+            font-size: var(--font-size-sm, 14px);
+            color: var(--color-light-med-navy, #d1d1db);
+        }
+        .resources-panel {
+            background-color: var(--color-dark-navy, #10101f);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: 1px solid var(--color-navy, #131322);
+        }
+        .resources-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .resource-btn {
+            background-color: var(--color-navy, #131322);
+            color: var(--color-light-med-navy, #d1d1db);
+            border: 1px solid var(--color-duller-navy, #3e405a);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-sm, 14px);
+        }
+        .resource-btn:hover {
+            background-color: var(--color-blue, #12e0ff);
+            color: var(--color-white, #f7f8f0);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(18, 224, 255, 0.3);
+        }
+        .resource-btn.selected {
+            background-color: var(--color-green, #19ef83);
+            color: var(--color-dark-navy, #10101f);
+            border-color: var(--color-green, #19ef83);
+            font-weight: bold;
+        }
+        .resource-icon {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--color-navy, #131322);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--color-ultra-dark-navy, #0b0b17);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: calc(100vh - 300px);
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .user-message {
+            background-color: var(--color-navy, #131322);
+            color: var(--color-light-med-navy, #d1d1db);
+            align-self: flex-end;
+            margin-left: 20%;
+            border: 1px solid var(--color-blue, #12e0ff);
+            border-radius: 16px 16px 4px 16px;
+        }
+        .assistant-message {
+            background-color: var(--color-dark-navy, #10101f);
+            color: var(--color-light-med-navy, #d1d1db);
+            align-self: flex-start;
+            margin-right: 20%;
+            border: 1px solid var(--color-duller-navy, #3e405a);
+            border-radius: 16px 16px 16px 4px;
+        }
+        .message pre {
+            background-color: var(--color-black-navy, #070710);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid var(--color-navy, #131322);
+        }
+        .message code {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* if SLOPPY mode is enabled use comic sans, else monospace */
+            background-color: var(--color-black-navy, #070710);
+            color: var(--color-green, #19ef83);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: var(--color-dark-navy, #10101f);
+            border-top: 1px solid var(--color-navy, #131322);
+            gap: 10px;
+        }
+        #message-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--color-duller-navy, #3e405a);
+            border-radius: 4px;
+            font-size: var(--font-size-md, 16px);
+            transition: all 0.3s ease;
+            background-color: var(--color-black-navy, #070710);
+            color: var(--color-light-med-navy, #d1d1db);
+        }
+        #message-input:focus {
+            outline: none;
+            border-color: var(--color-blue, #12e0ff);
+            box-shadow: 0 0 0 2px rgba(18, 224, 255, 0.1);
+        }
+        #send-btn {
+            background-color: var(--color-green, #19ef83);
+            color: var(--color-black-navy, #070710);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        #send-btn:hover {
+            background-color: var(--color-blue, #12e0ff);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(18, 224, 255, 0.3);
+        }
+        .controls-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #streaming-toggle {
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-sm, 14px);
+            gap: 5px;
+            color: var(--color-light-med-navy, #d1d1db);
+        }
+        #streaming-toggle input[type="checkbox"] {
+            accent-color: var(--color-green, #19ef83);
+        }
+        .clear-chat-btn {
+            background-color: var(--color-red, #fe4e4e);
+            color: var(--color-white, #f7f8f0);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: var(--font-size-sm, 14px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .clear-chat-btn:hover {
+            background-color: var(--color-pink, #e53d8f);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(229, 61, 143, 0.3);
+        }
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: var(--color-blue, #12e0ff);
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--color-navy, #131322);
+            border-radius: 50%;
+            border-top-color: var(--color-blue, #12e0ff);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px 0;
+            color: var(--color-light-med-navy, #d1d1db);
+        }
+        .katex {
+            font-size: 1.1em;
+        }
+        
+        /* Style scrollbar for Webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-black-navy, #070710);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-duller-navy, #3e405a);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-blue, #12e0ff);
+        }
+
+        #sloppy-toggle {
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-sm, 14px);
+            gap: 5px;
+            color: var(--color-light-med-navy, #d1d1db);
+            margin-left: 20px;
+        }
+
+        #sloppy-toggle input[type="checkbox"] {
+            accent-color: var(--color-pink, #e53d8f);
+        }
+
+        /* Add CSS variables for fonts */
+        :root {
+            --font-primary: 'League Spartan', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-code: monospace;
+        }
+
+        :root[data-sloppy="true"] {
+            --font-primary: 'Comic Sans MS', 'Comic Sans', cursive;
+            --font-code: 'Comic Sans MS', 'Comic Sans', cursive;
+        }
+
+        /* Update font-family rules to use variables */
+        * {
+            font-family: var(--font-primary);
+        }
+
+        body {
+            font-family: var(--font-primary);
+            /* ... rest of body styles ... */
+        }
+
+        .message code {
+            font-family: var(--font-code);
+            /* ... rest of code styles ... */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SLOP PDF Bot With Streaming 📄</h1>
+            <p>Interactive interface for the Simple Language Open Protocol</p>
+        </header>
+
+        <div class="upload-panel">
+            <h3>Upload Documents</h3>
+            <p>Upload PDFs, DOCXs, TXT, MD files, images, and more to chat with their content</p>
+            <div class="upload-form">
+                <div class="upload-form-row">
+                    <input type="file" id="file-input" multiple accept=".pdf,.txt,.md,.docx,.csv,.html,.js,.png,.jpg,.jpeg,.gif,.webp" />
+                    <span id="file-counter" class="file-counter">No files selected</span>
+                    <button id="upload-btn" class="upload-btn">Upload</button>
+                </div>
+                <div id="upload-status" class="upload-status"></div>
+            </div>
+        </div>
+
+        <div class="resources-panel">
+            <h3>Available Resources</h3>
+            <div class="resources-list" id="resources-list">
+                <div class="loading"></div>
+            </div>
+            <div class="controls-panel">
+                <div id="streaming-toggle">
+                    <input type="checkbox" id="use-streaming" checked>
+                    <label for="use-streaming">Use streaming responses</label>
+                </div>
+                <div id="sloppy-toggle">
+                    <input type="checkbox" id="use-sloppy">
+                    <label for="use-sloppy">SLOPPY Mode</label>
+                </div>
+                <button id="clear-chat-btn" class="clear-chat-btn">Clear Chat</button>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message assistant-message">
+                    <p>Hello! I'm your SLOP assistant. How can I help you today? Upload documents and I can answer questions about them!</p>
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="message-input" placeholder="Type your message here...">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Showdown converter for Markdown to HTML
+        const converter = new showdown.Converter({
+            tables: true,
+            simplifiedAutoLink: true,
+            strikethrough: true,
+            tasklists: true,
+            ghCodeBlocks: true,
+            // Add custom LaTeX delimiter handling
+            extensions: [{
+                type: 'lang',
+                regex: /\\\((.*?)\\\)/g,
+                replace: (_, match) => `<span class="inline-latex">${match}</span>`
+            }, {
+                type: 'lang',
+                regex: /\\\[(.*?)\\\]/g,
+                replace: (_, match) => `<div class="display-latex">${match}</div>`
+            }]
+        });
+
+        // Add function to render LaTeX in an element
+        function renderLatex(element) {
+            // Find all LaTeX elements
+            const inlineElements = element.getElementsByClassName('inline-latex');
+            const displayElements = element.getElementsByClassName('display-latex');
+            
+            // Render inline LaTeX
+            Array.from(inlineElements).forEach(el => {
+                try {
+                    katex.render(el.textContent, el, {
+                        displayMode: false,
+                        throwOnError: false
+                    });
+                } catch (error) {
+                    console.error('LaTeX rendering error:', error);
+                    el.textContent = `[LaTeX Error: ${error.message}]`;
+                }
+            });
+            
+            // Render display LaTeX
+            Array.from(displayElements).forEach(el => {
+                try {
+                    katex.render(el.textContent, el, {
+                        displayMode: true,
+                        throwOnError: false
+                    });
+                } catch (error) {
+                    console.error('LaTeX rendering error:', error);
+                    el.textContent = `[LaTeX Error: ${error.message}]`;
+                }
+            });
+        }
+
+        // Base URL for API
+        const API_BASE_URL = 'http://localhost:3000';
+        let serverConnected = false;
+
+        // Track currently selected resource
+        let selectedResourceId = null;
+        
+        // Show connection status
+        const checkServerConnection = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/resources`, { method: 'GET' });
+                if (response.ok) {
+                    serverConnected = true;
+                    document.querySelector('header p').textContent = 'Connected to SLOP server';
+                    document.querySelector('header p').style.color = 'green';
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                serverConnected = false;
+                document.querySelector('header p').textContent = 'Server disconnected - please start the server';
+                document.querySelector('header p').style.color = 'red';
+                return false;
+            }
+        };
+        
+        // Get file icon based on MIME type
+        const getFileIcon = (fileType) => {
+            if (!fileType) return '📄';
+            
+            if (fileType.startsWith('image/')) return '🖼️';
+            
+            switch (fileType) {
+                case 'application/pdf':
+                    return '📕';
+                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                    return '📝';
+                case 'text/plain':
+                    return '📄';
+                case 'text/markdown':
+                    return '📑';
+                case 'text/csv':
+                    return '📊';
+                case 'text/html':
+                    return '🌐';
+                case 'text/javascript':
+                    return '📜';
+                default:
+                    return '📄';
+            }
+        };
+        
+        // Handle file input change
+        const fileInput = document.getElementById('file-input');
+        const fileCounter = document.getElementById('file-counter');
+        
+        fileInput.addEventListener('change', () => {
+            const fileCount = fileInput.files.length;
+            if (fileCount === 0) {
+                fileCounter.textContent = 'No files selected';
+            } else if (fileCount === 1) {
+                fileCounter.textContent = '1 file selected';
+            } else {
+                fileCounter.textContent = `${fileCount} files selected`;
+            }
+        });
+        
+        // Handle file upload
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadStatus = document.getElementById('upload-status');
+        
+        uploadBtn.addEventListener('click', async () => {
+            if (!serverConnected) {
+                await checkServerConnection();
+                if (!serverConnected) {
+                    alert('Cannot upload: Server is not connected. Please start the server.');
+                    return;
+                }
+            }
+            
+            const files = fileInput.files;
+            if (files.length === 0) {
+                uploadStatus.textContent = 'Please select at least one file to upload.';
+                uploadStatus.style.color = 'red';
+                return;
+            }
+            
+            // Show loading state
+            uploadStatus.textContent = `Uploading ${files.length} file(s)...`;
+            uploadStatus.style.color = 'blue';
+            
+            const formData = new FormData();
+            for (const file of files) {
+                formData.append('files', file);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/resources/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    uploadStatus.textContent = `Successfully uploaded ${data.resources.length} file(s)`;
+                    uploadStatus.style.color = 'green';
+                    
+                    // Clear file input
+                    fileInput.value = '';
+                    fileCounter.textContent = 'No files selected';
+                    
+                    // Refresh resources list
+                    await loadResources();
+                    
+                    // Select the first resource if available
+                    if (data.resources.length > 0) {
+                        selectedResourceId = data.resources[0].id;
+                        
+                        // Add a system message about the upload
+                        const messageElement = document.createElement('div');
+                        messageElement.classList.add('message', 'assistant-message');
+                        
+                        if (data.resources.length === 1) {
+                            messageElement.innerHTML = `<p>I've loaded <strong>${data.resources[0].title}</strong>. You can now ask me questions about it!</p>`;
+                        } else {
+                            const fileNames = data.resources.map(r => r.title).join(', ');
+                            messageElement.innerHTML = `<p>I've loaded ${data.resources.length} files: <strong>${fileNames}</strong>. The first file is selected. You can now ask me questions about it!</p>`;
+                        }
+                        
+                        document.getElementById('messages').appendChild(messageElement);
+                        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+                    }
+                } else {
+                    uploadStatus.textContent = `Error: ${data.error || 'Unknown error'}`;
+                    uploadStatus.style.color = 'red';
+                }
+            } catch (error) {
+                console.error('Error uploading files:', error);
+                uploadStatus.textContent = 'Error uploading files. Please try again.';
+                uploadStatus.style.color = 'red';
+            }
+        });
+        
+        // Function to load resources
+        const loadResources = async () => {
+            if (!await checkServerConnection()) {
+                document.getElementById('resources-list').innerHTML = '<p>Server not connected</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/resources`);
+                const data = await response.json();
+                
+                // Display resources as clickable buttons
+                const resourcesList = document.getElementById('resources-list');
+                resourcesList.innerHTML = '';
+                
+                data.resources.forEach(resource => {
+                    const button = document.createElement('button');
+                    button.classList.add('resource-btn');
+                    
+                    // Add icon based on file type
+                    const icon = document.createElement('span');
+                    icon.classList.add('resource-icon');
+                    icon.textContent = getFileIcon(resource.fileType);
+                    button.appendChild(icon);
+                    
+                    // Add resource title
+                    const titleSpan = document.createElement('span');
+                    titleSpan.textContent = resource.title;
+                    button.appendChild(titleSpan);
+                    
+                    button.dataset.id = resource.id;
+                    
+                    // If this is the currently selected resource, mark it as selected
+                    if (selectedResourceId === resource.id) {
+                        button.classList.add('selected');
+                    }
+                    
+                    button.addEventListener('click', () => {
+                        // Toggle selection
+                        if (selectedResourceId === resource.id) {
+                            selectedResourceId = null;
+                            button.classList.remove('selected');
+                        } else {
+                            // Deselect any previously selected button
+                            document.querySelectorAll('.resource-btn.selected').forEach(btn => {
+                                btn.classList.remove('selected');
+                            });
+                            
+                            selectedResourceId = resource.id;
+                            button.classList.add('selected');
+                            
+                            // Add a message indicating the selection
+                            const messageElement = document.createElement('div');
+                            messageElement.classList.add('message', 'assistant-message');
+                            messageElement.innerHTML = `<p>You've selected <strong>${resource.title}</strong>. What would you like to know about it?</p>`;
+                            document.getElementById('messages').appendChild(messageElement);
+                            
+                            // Scroll to bottom
+                            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+                        }
+                    });
+                    
+                    resourcesList.appendChild(button);
+                });
+                
+                if (data.resources.length === 0) {
+                    resourcesList.innerHTML = '<p>No resources available</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching resources:', error);
+                document.getElementById('resources-list').innerHTML = '<p>Error loading resources</p>';
+            }
+        };
+        
+        // Handle clear chat button
+        const clearChatBtn = document.getElementById('clear-chat-btn');
+        clearChatBtn.addEventListener('click', () => {
+            // Clear all messages except the welcome message
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+            
+            // Add welcome message
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.classList.add('message', 'assistant-message');
+            welcomeMessage.innerHTML = '<p>Chat history cleared. How can I help you today?</p>';
+            messagesContainer.appendChild(welcomeMessage);
+        });
+        
+        // Fetch available resources when page loads
+        document.addEventListener('DOMContentLoaded', loadResources);
+        
+        // Set up message sending
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-btn');
+        const messagesContainer = document.getElementById('messages');
+        const streamingToggle = document.getElementById('use-streaming');
+        
+        const sendMessage = async () => {
+            if (!serverConnected) {
+                await checkServerConnection();
+                if (!serverConnected) {
+                    alert('Cannot send message: Server is not connected. Please start the server.');
+                    return;
+                }
+            }
+
+            const messageContent = messageInput.value.trim();
+            if (!messageContent) return;
+            
+            // Add user message to UI
+            const userMessageElement = document.createElement('div');
+            userMessageElement.classList.add('message', 'user-message');
+            userMessageElement.innerHTML = `<p>${messageContent}</p>`;
+            messagesContainer.appendChild(userMessageElement);
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Add loading indicator for assistant response
+            const loadingElement = document.createElement('div');
+            loadingElement.classList.add('message', 'assistant-message');
+            loadingElement.innerHTML = '<div class="loading"></div>';
+            messagesContainer.appendChild(loadingElement);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Check if streaming is enabled
+            const useStreaming = streamingToggle.checked;
+            
+            if (useStreaming) {
+                // Use streaming endpoint
+                await streamingChat(messageContent, loadingElement);
+            } else {
+                // Use regular chat endpoint
+                await regularChat(messageContent, loadingElement);
+            }
+        };
+        
+        // Regular chat function (non-streaming)
+        const regularChat = async (messageContent, loadingElement) => {
+            try {
+                // Send request to SLOP server
+                const payload = {
+                    messages: [{ role: 'user', content: messageContent }]
+                };
+                
+                // Include resource_id if a resource is selected
+                if (selectedResourceId) {
+                    payload.resource_id = selectedResourceId;
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                // Convert Markdown to HTML using Showdown
+                const htmlContent = converter.makeHtml(data.message.content);
+                
+                // Update the loading element with the response
+                loadingElement.innerHTML = htmlContent;
+                
+                // Render any LaTeX in the response
+                renderLatex(loadingElement);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error sending message:', error);
+                loadingElement.innerHTML = '<p>Error: Failed to get a response. Please try again.</p>';
+            }
+        };
+        
+        // Streaming chat function
+        const streamingChat = async (messageContent, loadingElement) => {
+            try {
+                // Prepare for streaming response
+                loadingElement.innerHTML = '<div class="streaming-response"></div><div class="cursor"></div>';
+                const streamingResponseElement = loadingElement.querySelector('.streaming-response');
+                
+                // Create payload
+                const payload = {
+                    messages: [{ role: 'user', content: messageContent }]
+                };
+                
+                // Include resource_id if a resource is selected
+                if (selectedResourceId) {
+                    payload.resource_id = selectedResourceId;
+                }
+                
+                let accumulatedMarkdown = '';
+
+                // Create an AbortController to handle timeouts and manual aborts
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
+                
+                // Use fetch with streaming response handling
+                try {
+                    const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
+                    });
+                    
+                    // Clear the timeout since we got a response
+                    clearTimeout(timeoutId);
+                    
+                    // Check for successful response
+                    if (!response.ok) {
+                        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    // Set up reader for the response stream
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    
+                    // Define a function to process the data chunks
+                    const processStream = async () => {
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            
+                            if (done) {
+                                // Remove cursor when we're done
+                                const cursor = loadingElement.querySelector('.cursor');
+                                if (cursor) cursor.remove();
+                                break;
+                            }
+                            
+                            // Decode the chunk
+                            const chunk = decoder.decode(value, { stream: true });
+                            
+                            // Process the SSE data format (data: {...}\n\n)
+                            const lines = chunk.split('\n\n');
+                            
+                            for (const line of lines) {
+                                if (line.trim() === '') continue;
+                                
+                                // Extract JSON from the line (remove 'data: ' prefix)
+                                const jsonStr = line.replace(/^data: /, '').trim();
+                                if (!jsonStr) continue;
+                                
+                                try {
+                                    const data = JSON.parse(jsonStr);
+                                    
+                                    switch (data.event) {
+                                        case 'start':
+                                            console.log('Streaming started');
+                                            break;
+                                            
+                                        case 'content':
+                                            // Append new content
+                                            accumulatedMarkdown += data.content;
+                                            // Convert to HTML and update the UI
+                                            const htmlContent = converter.makeHtml(accumulatedMarkdown);
+                                            streamingResponseElement.innerHTML = htmlContent;
+                                            // Render any LaTeX in the response
+                                            renderLatex(streamingResponseElement);
+                                            // Scroll to bottom
+                                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                            break;
+                                            
+                                        case 'end':
+                                            console.log('Streaming ended');
+                                            // Remove cursor now that we're done
+                                            const cursor = loadingElement.querySelector('.cursor');
+                                            if (cursor) cursor.remove();
+                                            break;
+                                            
+                                        case 'error':
+                                            console.error('Streaming error:', data.error);
+                                            loadingElement.innerHTML = `<p>Error: ${data.error}</p>`;
+                                            return;
+                                    }
+                                } catch (err) {
+                                    console.error('Error parsing SSE data:', err, jsonStr);
+                                }
+                            }
+                        }
+                    };
+                    
+                    // Start processing the stream
+                    await processStream();
+                    
+                } catch (fetchError) {
+                    console.error('Fetch error:', fetchError);
+                    loadingElement.innerHTML = `<p>Error: ${fetchError.message}</p>`;
+                    
+                    // Clean up the timeout if needed
+                    clearTimeout(timeoutId);
+                }
+                
+            } catch (error) {
+                console.error('Error in streaming chat:', error);
+                loadingElement.innerHTML = '<p>Error: Failed to start streaming. Please try again.</p>';
+            }
+        };
+        
+        // Handle send button click
+        sendButton.addEventListener('click', sendMessage);
+        
+        // Handle Enter key press
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Handle SLOPPY Mode toggle
+        const sloppyToggle = document.getElementById('use-sloppy');
+        sloppyToggle.addEventListener('change', (e) => {
+            document.documentElement.setAttribute('data-sloppy', e.target.checked);
+            
+            // Add a fun message when toggling
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'assistant-message');
+            if (e.target.checked) {
+                messageElement.innerHTML = "<p>🎨 SLOPPY Mode activated! Everything is more fun in Comic Sans!</p>";
+            } else {
+                messageElement.innerHTML = "<p>🎯 Back to professional mode with League Spartan.</p>";
+            }
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    </script>
+</body>
+</html>
