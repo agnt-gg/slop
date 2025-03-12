@@ -85,13 +85,13 @@ docker run -p 3000:3000 -e OPENAI_API_KEY=your_key_here slop-pdf-bot
 
 ## ✨ SLOP Bot Features
 
-### 🎨 Modern User Interface
-### 🔄 Real-time Streaming
-### 📝 Rich Markdown Support
-### 🧮 LaTeX Math Integration
-### 📁 Dynamic File Management
-### 💬 Chat Interface
-### 🎛️ Controls & Settings
+#### - Modern User Interface
+#### - Real-time Streaming
+#### - Rich Markdown Support
+#### - LaTeX Math Integration
+#### - Dynamic File Management
+#### - Chat Interface
+#### - Controls & Settings
 
 ### 🔧 Technical Features
 - **Frontend Architecture**
