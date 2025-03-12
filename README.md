@@ -45,6 +45,7 @@ That's it. Just a pattern. ✨
 - Persistent Memory Allows Seamless Agent Collaboration
 - Works for Simple to Complex Use Cases:
 
+  - [PDF Chat Bot With Streaming](https://github.com/agnt-gg/slop/tree/main/examples/javascript/advanced-examples/pdf-bot-with-stream)
   - Customer Service Bots with Specialist Routing
   - Research Assistants with Domain-Specific Agents
   - Creative Workflows with Multiple AI Collaborators
