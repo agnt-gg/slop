@@ -98,37 +98,6 @@ docker run -p 3000:3000 -e OPENAI_API_KEY=your_key_here slop-pdf-bot
 - Chat Interface
 - Controls & Settings
 
-### 🔧 Technical Features
-- **Frontend Architecture**
-  - Pure vanilla JavaScript
-  - No framework dependencies
-  - Server-Sent Events (SSE)
-  - Async/await patterns
-  - Error boundary handling
-  - Memory management
-  - Event delegation
-  - Resource caching
-
-### 🛡️ Reliability Features
-- **Robust Error Handling**
-  - Connection loss recovery
-  - Retry mechanisms
-  - Timeout handling
-  - Graceful fallbacks
-  - Clear error messages
-  - Debug information
-  - State recovery
-
-### 📱 Responsive Design
-- **Cross-Platform Support**
-  - Mobile-first approach
-  - Tablet optimization
-  - Desktop enhancement
-  - Touch-friendly controls
-  - Flexible layouts
-  - Dynamic sizing
-  - Orientation support
-
 ---
 
 ## 🔧 Configuration
