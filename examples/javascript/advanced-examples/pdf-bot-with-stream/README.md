@@ -8,7 +8,7 @@
 
 <div align="center">
   <img src="https://github.com/agnt-gg/slop/blob/main/examples/javascript/advanced-examples/pdf-bot-with-stream/screenshot.PNG?raw=true" alt="SLOP PDF Bot Interface" width="100%"/>
-  <p><em>SLOP PDF Bot with Dark Mode Interface and SLOPPY Mode Toggle</em></p>
+  <p><em>SLOP PDF Bot with Dynamic Resource Management and Real-time Streaming</em></p>
 </div>
 
 ## 🛠️ Quick Installation
