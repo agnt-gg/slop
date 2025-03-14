@@ -1,0 +1,59 @@
+{
+  "name": "@phughesmcr/slop",
+  "version": "0.0.1",
+  "license": "MIT",
+  "exports": {
+    ".": "./slop.ts",
+    "./lib": "./lib/SlopManager.ts"
+  },
+  "bin": {
+    "slop-server": "./local-server.ts"
+  },
+  "tasks": {
+    "start:server": "deno run -A ./local-server.ts",
+    "start:client": "deno run -A ./local-client.ts",
+    "test:server": "deno test --allow-net ./lib/**/*.test.ts",
+    "test": "deno task test:server",
+    "precommit": "deno fmt && deno lint --fix && deno check ./slop.ts ./local-server.ts ./local-client.ts ./lib/**/*.ts"
+  },
+  "include": [
+    "slop.ts",
+    "local-client.ts",
+    "local-server.ts",
+    "lib/**/*.ts"
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictPropertyInitialization": true,
+    "strictBindCallApply": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
+  },
+  "fmt": {
+    "lineWidth": 99,
+    "exclude": [
+      "**/*.md"
+    ]
+  },
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended"
+      ],
+      "exclude": [
+        "no-explicit-any"
+      ]
+    }
+  },
+  "lock": false
+}
