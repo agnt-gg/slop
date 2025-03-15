@@ -175,7 +175,7 @@ class SLOPInspector {
         const server = http.createServer((req, res) => {
             if (req.url === '/') {
                 // Serve the HTML dashboard
-                fs.readFile(path.join(__dirname, 'slop-inspector.html'), (err, data) => {
+                fs.readFile(path.join(__dirname, '../client/client.html'), (err, data) => {
                     if (err) {
                         res.writeHead(500);
                         res.end('Error loading dashboard');
