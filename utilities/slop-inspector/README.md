@@ -1,5 +1,10 @@
 # 🕵️‍♂️ SLOP Inspector
 
+<div align="center">
+  <img src="https://github.com/agnt-gg/slop/blob/main/utilities/slop-inspector/screenshot.PNG?raw=true" alt="SLOP Inspector" width="100%"/>
+  <p><em>The Ultimate SLOP Debugging & Validation Tool</em></p>
+</div>
+
 ## 🌟 Overview
 SLOP Inspector is your secret weapon for debugging, validating, and analyzing SLOP (Serverless Large Language Model Open Protocol) implementations! Think of it as your API's best friend - always watching, always helping, never judging (okay, maybe a little judging when you forget a required parameter).
 
