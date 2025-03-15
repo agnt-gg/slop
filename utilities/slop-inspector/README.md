@@ -6,7 +6,7 @@
 </div>
 
 ## 🌟 Overview
-SLOP Inspector is your secret weapon for debugging, validating, and analyzing SLOP (Serverless Large Language Model Open Protocol) implementations! Think of it as your API's best friend - always watching, always helping, never judging (okay, maybe a little judging when you forget a required parameter).
+SLOP Inspector is your secret weapon for debugging, validating, and analyzing SLOP (Simple Language Open Protocol) implementations! Think of it as your API's best friend - always watching, always helping, never judging (okay, maybe a little judging when you forget a required parameter).
 
 ## ✨ Super Cool Features
 
