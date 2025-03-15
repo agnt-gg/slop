@@ -1,0 +1,31 @@
+{
+  "name": "slop-inspector",
+  "version": "1.0.0",
+  "description": "The Ultimate Debugging, Validation, and Traffic Analysis Tool for SLOP Developers",
+  "main": "slop-inspector.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "monitor": "node server.js --monitor"
+  },
+  "keywords": [
+    "SLOP",
+    "API",
+    "debugging",
+    "validation",
+    "traffic",
+    "monitoring"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "ws": "^8.14.2"
+  },
+  "bin": {
+    "slop-inspector": "./server.js"
+  },
+  "engines": {
+    "node": ">=14.16.0"
+  }
+}

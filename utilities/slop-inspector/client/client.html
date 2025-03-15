@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOP Inspector Dashboard</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #34495e;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+            padding: 0;
+            margin: 0;
+        }
+        
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .header-title p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-connected {
+            background-color: var(--success);
+        }
+        
+        .status-disconnected {
+            background-color: var(--danger);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 992px) {
+            .dashboard {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1rem;
+            background: var(--dark);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1rem 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th, table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+            background: #f8f9fa;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: auto;
+            font-family: monospace;
+        }
+        
+        .validation-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .endpoint-card {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .endpoint-header {
+            padding: 0.75rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .endpoint-header.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .endpoint-header.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .endpoint-body {
+            padding: 0.75rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .traffic-log {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border-left: 4px solid #ddd;
+            background: #f8f9fa;
+        }
+        
+        .traffic-success {
+            border-left-color: var(--success);
+        }
+        
+        .traffic-error {
+            border-left-color: var(--danger);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .badge-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .log-details {
+            display: none;
+        }
+        
+        .log-details.open {
+            display: block;
+        }
+        
+        .performance-chart {
+            height: 200px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            margin-top: 1rem;
+            position: relative;
+            padding: 1rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        
+        .chart-bar {
+            background: var(--primary);
+            flex: 1;
+            min-width: 20px;
+            position: relative;
+            transition: height 0.3s;
+        }
+        
+        .chart-bar::after {
+            content: attr(data-value) + 'ms';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+        }
+        
+        .chart-no-data {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">
+            <h1>SLOP Inspector</h1>
+            <p>The Ultimate SLOP Debugging & Validation Tool</p>
+        </div>
+        <div class="connection-status">
+            <div class="status-indicator status-disconnected" id="connection-indicator"></div>
+            <span id="connection-text">Disconnected</span>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="dashboard">
+            <!-- Sidebar -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        Server Status
+                        <button class="btn btn-primary" id="run-validation-btn">Run Validation</button>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <strong>Target URL:</strong>
+                            <span id="target-url">Loading...</span>
+                        </div>
+                        <div>
+                            <strong>Status:</strong>
+                            <span id="server-status">Unknown</span>
+                        </div>
+                        <div>
+                            <strong>Last Validated:</strong>
+                            <span id="last-validated">Never</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header">
+                        Traffic Stats
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <strong>Total Requests:</strong>
+                            <span id="total-requests">0</span>
+                        </div>
+                        <div>
+                            <strong>Success Rate:</strong>
+                            <span id="success-rate">0%</span>
+                        </div>
+                        <div>
+                            <strong>Avg Response Time:</strong>
+                            <span id="avg-response-time">0ms</span>
+                        </div>
+                        <div>
+                            <strong>Error Count:</strong>
+                            <span id="error-count">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header">
+                        Response Time
+                    </div>
+                    <div class="card-body">
+                        <div class="performance-chart" id="performance-chart">
+                            <div class="chart-no-data">No data available</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab active" data-tab="traffic">Traffic Monitor</div>
+                    <div class="tab" data-tab="validation">SLOP Validation</div>
+                    <div class="tab" data-tab="debug">API Debugger</div>
+                </div>
+                
+                <!-- Traffic Monitor Tab -->
+                <div class="tab-content active" data-content="traffic">
+                    <div class="filter-bar">
+                        <input type="text" class="filter-input" id="endpoint-filter" placeholder="Filter by endpoint">
+                        <select class="filter-input" id="status-filter">
+                            <option value="">All Status Codes</option>
+                            <option value="200">200 - OK</option>
+                            <option value="400">400 - Bad Request</option>
+                            <option value="404">404 - Not Found</option>
+                            <option value="500">500 - Server Error</option>
+                        </select>
+                        <button class="btn btn-primary" id="clear-logs-btn">Clear Logs</button>
+                        <button class="btn btn-success" id="export-logs-btn">Export Logs</button>
+                    </div>
+                    
+                    <div id="traffic-logs-container">
+                        <div class="traffic-log">No traffic logs yet. Make some requests to your SLOP server.</div>
+                    </div>
+                </div>
+                
+                <!-- Validation Tab -->
+                <div class="tab-content" data-content="validation">
+                    <div id="validation-results" class="validation-results">
+                        <p>Run validation to see results.</p>
+                    </div>
+                </div>
+                
+                <!-- API Debugger Tab -->
+                <div class="tab-content" data-content="debug">
+                    <div class="card">
+                        <div class="card-header">
+                            API Request Builder
+                        </div>
+                        <div class="card-body">
+                            <form id="request-form">
+                                <div style="margin-bottom: 1rem;">
+                                    <label for="request-method">Method:</label>
+                                    <select id="request-method" class="filter-input">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                    </select>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <label for="request-endpoint">Endpoint:</label>
+                                    <select id="request-endpoint" class="filter-input">
+                                        <option value="/chat">/chat</option>
+                                        <option value="/tools">/tools</option>
+                                        <option value="/memory">/memory</option>
+                                        <option value="/resources">/resources</option>
+                                        <option value="/pay">/pay</option>
+                                    </select>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <label for="request-payload">Payload (JSON):</label>
+                                    <textarea id="request-payload" class="filter-input" style="width: 100%; min-height: 150px;"></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Send Request</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 1rem;">
+                        <div class="card-header">
+                            Response
+                        </div>
+                        <div class="card-body">
+                            <pre id="response-container">No response yet.</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        const state = {
+            trafficLogs: [],
+            validationResults: null,
+            isConnected: false,
+            targetUrl: null,
+            lastValidated: null,
+            selectedTrafficLog: null
+        };
+        
+        // WebSocket connection
+        let socket;
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            let host = window.location.host;
+            
+            // If opened directly from filesystem or host is empty, use localhost:4000
+            if (!host || window.location.protocol === 'file:') {
+                host = 'localhost:4000';
+            }
+            
+            const wsUrl = `${protocol}//${host}`;
+            console.log('Connecting to WebSocket at:', wsUrl);
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = () => {
+                console.log('WebSocket connected');
+                state.isConnected = true;
+                updateConnectionStatus();
+            };
+            
+            socket.onclose = (event) => {
+                console.log('WebSocket closed:', event.code, event.reason);
+                state.isConnected = false;
+                updateConnectionStatus();
+                // Try to reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+            
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+        }
+        
+        function updateConnectionStatus() {
+            const indicator = document.getElementById('connection-indicator');
+            const text = document.getElementById('connection-text');
+            
+            if (state.isConnected) {
+                indicator.classList.remove('status-disconnected');
+                indicator.classList.add('status-connected');
+                text.textContent = 'Connected';
+            } else {
+                indicator.classList.remove('status-connected');
+                indicator.classList.add('status-disconnected');
+                text.textContent = 'Disconnected';
+            }
+        }
+        
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'initialData':
+                    state.trafficLogs = data.data.trafficLogs;
+                    state.validationResults = data.data.validationResults;
+                    if (state.validationResults) {
+                        state.lastValidated = new Date().toLocaleString();
+                    }
+                    state.targetUrl = data.data.targetUrl;
+                    updateUI();
+                    break;
+                    
+                case 'newTraffic':
+                    state.trafficLogs.unshift(data.data);
+                    // Limit the number of logs in the UI to prevent slowdowns
+                    if (state.trafficLogs.length > 100) {
+                        state.trafficLogs = state.trafficLogs.slice(0, 100);
+                    }
+                    updateTrafficLogs();
+                    updateStats();
+                    updatePerformanceChart();
+                    break;
+                    
+                case 'validationResults':
+                    state.validationResults = data.data;
+                    state.lastValidated = new Date().toLocaleString();
+                    updateValidationResults();
+                    updateUI();
+                    break;
+            }
+        }
+        
+        // UI Updates
+        function updateUI() {
+            updateTrafficLogs();
+            updateValidationResults();
+            updateStats();
+            updateServerInfo();
+            updatePerformanceChart();
+        }
+        
+        function updateTrafficLogs() {
+            const container = document.getElementById('traffic-logs-container');
+            const endpointFilter = document.getElementById('endpoint-filter').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            
+            // Filter logs
+            let filteredLogs = state.trafficLogs;
+            
+            if (endpointFilter) {
+                filteredLogs = filteredLogs.filter(log => 
+                    log.url.toLowerCase().includes(endpointFilter)
+                );
+            }
+            
+            if (statusFilter) {
+                filteredLogs = filteredLogs.filter(log => 
+                    log.statusCode?.toString() === statusFilter
+                );
+            }
+            
+            if (filteredLogs.length === 0) {
+                container.innerHTML = '<div class="traffic-log">No matching traffic logs.</div>';
+                return;
+            }
+            
+            container.innerHTML = filteredLogs.map((log, index) => {
+                const isSuccess = log.statusCode >= 200 && log.statusCode < 300;
+                const logClass = isSuccess ? 'traffic-success' : 'traffic-error';
+                const timestamp = new Date(log.timestamp).toLocaleTimeString();
+                
+                return `
+                    <div class="traffic-log ${logClass}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${log.method}</strong> ${log.url.replace(/^.*\/\/[^\/]+/, '')}
+                                ${log.statusCode ? 
+                                    `<span class="badge ${isSuccess ? 'badge-success' : 'badge-danger'}">${log.statusCode}</span>` : 
+                                    '<span class="badge badge-danger">Error</span>'}
+                                <span class="badge badge-warning">${log.responseTime}ms</span>
+                            </div>
+                            <div>
+                                <small>${timestamp}</small>
+                                <button class="btn btn-primary" onclick="toggleLogDetails(${index})">Details</button>
+                                <button class="btn btn-success" onclick="replayRequest(${index})">Replay</button>
+                            </div>
+                        </div>
+                        <div class="log-details" id="log-details-${index}">
+                            ${log.payload ? 
+                                `<div>
+                                    <strong>Request Payload:</strong>
+                                    <pre>${JSON.stringify(log.payload, null, 2)}</pre>
+                                </div>` : ''}
+                            
+                            ${log.response ? 
+                                `<div>
+                                    <strong>Response:</strong>
+                                    <pre>${JSON.stringify(log.response, null, 2)}</pre>
+                                </div>` : ''}
+                            
+                            ${log.error ? 
+                                `<div>
+                                    <strong>Error:</strong>
+                                    <pre>${log.error}</pre>
+                                </div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateValidationResults() {
+            const container = document.getElementById('validation-results');
+            
+            if (!state.validationResults) {
+                container.innerHTML = '<p>Run validation to see results.</p>';
+                return;
+            }
+            
+            container.innerHTML = Object.entries(state.validationResults).map(([endpoint, result]) => {
+                const isSuccess = result.statusCode >= 200 && result.statusCode < 300 && !result.error;
+                
+                if (endpoint === 'memory') {
+                    const storeSuccess = result.storeResponse.statusCode >= 200 && 
+                                        result.storeResponse.statusCode < 300 && 
+                                        !result.storeResponse.error;
+                    const getSuccess = result.getResponse.statusCode >= 200 && 
+                                      result.getResponse.statusCode < 300 && 
+                                      !result.getResponse.error;
+                    
+                    return `
+                        <div class="endpoint-card">
+                            <div class="endpoint-header ${storeSuccess && getSuccess ? 'success' : 'error'}">
+                                /memory
+                                <span class="badge ${storeSuccess && getSuccess ? 'badge-success' : 'badge-danger'}">
+                                    ${storeSuccess && getSuccess ? 'PASS' : 'FAIL'}
+                                </span>
+                            </div>
+                            <div class="endpoint-body">
+                                <div>
+                                    <strong>Store:</strong> ${storeSuccess ? 'Success' : 'Failed'}
+                                    ${result.storeResponse.error ? `<div>Error: ${result.storeResponse.error}</div>` : ''}
+                                </div>
+                                <div>
+                                    <strong>Get:</strong> ${getSuccess ? 'Success' : 'Failed'}
+                                    ${result.getResponse.error ? `<div>Error: ${result.getResponse.error}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="endpoint-card">
+                            <div class="endpoint-header ${isSuccess ? 'success' : 'error'}">
+                                /${endpoint}
+                                <span class="badge ${isSuccess ? 'badge-success' : 'badge-danger'}">
+                                    ${isSuccess ? 'PASS' : 'FAIL'}
+                                </span>
+                            </div>
+                            <div class="endpoint-body">
+                                <div>
+                                    <strong>Status:</strong> ${result.statusCode || 'Error'}
+                                </div>
+                                ${result.error ? 
+                                    `<div>
+                                        <strong>Error:</strong> ${result.error}
+                                    </div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        function updateStats() {
+            const totalRequests = state.trafficLogs.length;
+            const successfulRequests = state.trafficLogs.filter(log => 
+                log.statusCode >= 200 && log.statusCode < 300
+            ).length;
+            
+            const successRate = totalRequests > 0 ? 
+                Math.round((successfulRequests / totalRequests) * 100) : 0;
+            
+            const responseTimes = state.trafficLogs
+                .map(log => log.responseTime)
+                .filter(time => time);
+            
+            const avgResponseTime = responseTimes.length > 0 ? 
+                Math.round(responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length) : 0;
+            
+            const errorCount = totalRequests - successfulRequests;
+            
+            document.getElementById('total-requests').textContent = totalRequests;
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+            document.getElementById('avg-response-time').textContent = `${avgResponseTime}ms`;
+            document.getElementById('error-count').textContent = errorCount;
+        }
+        
+        function updateServerInfo() {
+            if (state.targetUrl) {
+                document.getElementById('target-url').textContent = state.targetUrl;
+            }
+            
+            document.getElementById('last-validated').textContent = 
+                state.lastValidated || 'Never';
+            
+            const serverStatus = state.isConnected ? 'Connected' : 'Disconnected';
+            document.getElementById('server-status').textContent = serverStatus;
+        }
+        
+        function updatePerformanceChart() {
+            const chartContainer = document.getElementById('performance-chart');
+            const responseTimes = state.trafficLogs
+                .slice(0, 10)
+                .map(log => log.responseTime)
+                .filter(time => time)
+                .reverse();
+            
+            if (responseTimes.length === 0) {
+                chartContainer.innerHTML = '<div class="chart-no-data">No data available</div>';
+                return;
+            }
+            
+            const maxTime = Math.max(...responseTimes);
+            
+            chartContainer.innerHTML = responseTimes.map(time => {
+                const height = Math.max(10, (time / maxTime) * 180);
+                return `<div class="chart-bar" style="height: ${height}px;" data-value="${time}"></div>`;
+            }).join('');
+        }
+        
+        // Event handlers
+        function toggleLogDetails(index) {
+            const detailsEl = document.getElementById(`log-details-${index}`);
+            detailsEl.classList.toggle('open');
+        }
+        
+        function replayRequest(index) {
+            const log = state.trafficLogs[index];
+            if (!log) return;
+            
+            // Pre-fill the debug form
+            document.getElementById('request-method').value = log.method;
+            
+            const endpointSelect = document.getElementById('request-endpoint');
+            const endpoint = Object.entries(state.endpoints || {
+                chat: '/chat',
+                tools: '/tools',
+                memory: '/memory',
+                resources: '/resources',
+                pay: '/pay'
+            }).find(([_, path]) => log.url.includes(path));
+            
+            if (endpoint) {
+                endpointSelect.value = endpoint[1];
+            }
+            
+            if (log.payload) {
+                document.getElementById('request-payload').value = JSON.stringify(log.payload, null, 2);
+            }
+            
+            // Switch to debug tab
+            switchTab('debug');
+        }
+        
+        // Tab switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                if (content.getAttribute('data-content') === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+        
+        // Run validation
+        function runValidation() {
+            if (!socket || socket.readyState !== 1) { // WebSocket.OPEN
+                alert('Not connected to server. Please wait for connection to be established.');
+                return;
+            }
+            
+            socket.send(JSON.stringify({
+                type: 'runValidation'
+            }));
+        }
+        
+        // Clear logs
+        function clearLogs() {
+            state.trafficLogs = [];
+            updateTrafficLogs();
+            updateStats();
+            updatePerformanceChart();
+        }
+        
+        // Export logs
+        function exportLogs() {
+            const dataStr = JSON.stringify(state.trafficLogs, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `slop-inspector-logs-${new Date().toISOString().slice(0, 10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+        
+        // Send custom request
+        function sendCustomRequest(event) {
+            event.preventDefault();
+            
+            const method = document.getElementById('request-method').value;
+            const endpoint = document.getElementById('request-endpoint').value;
+            const payloadStr = document.getElementById('request-payload').value;
+            
+            let payload = null;
+            if (payloadStr) {
+                try {
+                    payload = JSON.parse(payloadStr);
+                } catch (err) {
+                    alert('Invalid JSON payload: ' + err.message);
+                    return;
+                }
+            }
+            
+            const url = state.targetUrl + endpoint;
+            
+            socket.send(JSON.stringify({
+                type: 'replayRequest',
+                requestData: {
+                    method,
+                    url,
+                    payload
+                }
+            }));
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set up tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.getAttribute('data-tab'));
+                });
+            });
+            
+            // Run validation button
+            document.getElementById('run-validation-btn').addEventListener('click', runValidation);
+            
+            // Clear logs button
+            document.getElementById('clear-logs-btn').addEventListener('click', clearLogs);
+            
+            // Export logs button
+            document.getElementById('export-logs-btn').addEventListener('click', exportLogs);
+            
+            // Filter inputs
+            document.getElementById('endpoint-filter').addEventListener('input', updateTrafficLogs);
+            document.getElementById('status-filter').addEventListener('change', updateTrafficLogs);
+            
+            // Request form
+            document.getElementById('request-form').addEventListener('submit', sendCustomRequest);
+            
+            // Initialize example payload
+            const requestEndpoint = document.getElementById('request-endpoint');
+            const requestPayload = document.getElementById('request-payload');
+            
+            requestEndpoint.addEventListener('change', () => {
+                switch (requestEndpoint.value) {
+                    case '/chat':
+                        requestPayload.value = JSON.stringify({
+                            messages: [{ role: "user", content: "Hello SLOP!" }]
+                        }, null, 2);
+                        break;
+                    case '/memory':
+                        requestPayload.value = JSON.stringify({
+                            key: "test_key",
+                            value: "test_value"
+                        }, null, 2);
+                        break;
+                    case '/pay':
+                        requestPayload.value = JSON.stringify({
+                            amount: 10
+                        }, null, 2);
+                        break;
+                    default:
+                        requestPayload.value = '';
+                }
+            });
+            
+            // Set initial payload
+            requestEndpoint.dispatchEvent(new Event('change'));
+            
+            // Connect WebSocket
+            connectWebSocket();
+        });
+        
+        // Make functions accessible globally for inline event handlers
+        window.toggleLogDetails = toggleLogDetails;
+        window.replayRequest = replayRequest;
+        window.switchTab = switchTab;
+    </script>
+</body>
+</html>
