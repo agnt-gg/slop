@@ -20,6 +20,10 @@ That's it. Just a pattern. ✨
 
 ---
 
+![Star History Chart](https://api.star-history.com/svg?repos=agnt-gg/slop&type=Date)
+
+---
+
 ## 1. CORE BELIEFS
 - Everything is an HTTP request
 - Every tool is an API endpoint
