@@ -1,6 +1,9 @@
 # 🐉 AI Quest: The D&D Chat Adventure
 
-![AI Quest Banner](https://via.placeholder.com/800x200/0a0a0a/ffffff?text=AI+Quest:+D%26D+Chat+Adventure)
+<div align="center">
+  <img src="https://github.com/agnt-gg/slop/blob/main/examples/javascript/advanced-examples/ai-dnd-chat-game/screenshot.png?raw=true" alt="SLOP AI DnD Chat Game" width="100%"/>
+  <p><em>Interactive D&D game experience powered by AI using SLOP protocol</em></p>
+</div>
 
 > *"Roll for initiative! Your AI Dungeon Master awaits..."*
 
