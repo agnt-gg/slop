@@ -20,7 +20,7 @@ SLOP Inspector is your secret weapon for debugging, validating, and analyzing SL
 
 ```bash
 # Clone the repository (or download like it's 1999)
-git clone <repository-url>
+git clone https://github.com/agnt-gg/slop/
 cd slop/utilities/slop-inspector/server
 
 # Install dependencies (grab a coffee, this might take a whole 10 seconds)
