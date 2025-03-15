@@ -1,0 +1,20 @@
+{
+  "name": "ai-dnd-chat-game",
+  "version": "1.0.0",
+  "description": "Interactive D&D game experience powered by AI using SLOP protocol",
+  "main": "server.js",
+  "author": "Nathan Wilbanks @NathanWilbanks_",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.87.3",
+    "uuid": "^11.1.0"
+  }
+}

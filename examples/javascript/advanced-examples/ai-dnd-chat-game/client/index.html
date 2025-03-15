@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLOP AI DnD Quest</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #1a1a1a;
+        color: #fff;
+        height: 100vh;
+        box-sizing: border-box;
+      }
+
+      .game-container {
+        display: grid;
+        grid-template-columns: 2fr 400px; /* Fixed width for right panel */
+        gap: 20px;
+        height: calc(100vh - 120px); /* Full height minus padding and header */
+      }
+
+      .chat-window {
+        height: calc(100vh - 200px); /* Adjust height to fit screen */
+      }
+
+      .side-panel {
+        height: 100%;
+        overflow-y: auto;
+        padding-right: 10px;
+        position: sticky;
+        top: 20px;
+      }
+
+      .dice-panel {
+        background: #2a2a2a;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .dice-history {
+        max-height: 150px;
+        overflow-y: auto;
+        margin-top: 10px;
+      }
+
+      .dice-roll {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        margin: 5px 0;
+        background: #3a3a3a;
+        border-radius: 3px;
+        animation: rollIn 0.3s ease-out;
+      }
+
+      .dice-roll.critical-success {
+        background: #2ecc71;
+        color: #fff;
+      }
+
+      .dice-roll.critical-fail {
+        background: #e74c3c;
+        color: #fff;
+      }
+
+      @keyframes rollIn {
+        from {
+          transform: translateX(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .dice-result {
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+
+      .stats-panel,
+      .equipment-panel,
+      .inventory,
+      .skills-list {
+        background: #2a2a2a;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .game-container {
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 20px;
+      }
+
+      .chat-window {
+        height: 100%;
+        height: -webkit-fill-available;
+        overflow-y: auto;
+        border: 1px solid #444;
+        padding: 10px;
+        background: #2a2a2a;
+        border-radius: 5px;
+      }
+
+      .inventory {
+        border: 1px solid #444;
+        padding: 10px;
+        background: #2a2a2a;
+        border-radius: 5px;
+        margin-bottom: 15px;
+      }
+
+      .message {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .user {
+        background: #3a3a3a;
+      }
+      .npc {
+        background: #4a4a4a;
+      }
+
+      input,
+      button {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
+        border: none;
+      }
+
+      input {
+        width: 70%;
+        background: #3a3a3a;
+        color: #fff;
+      }
+
+      button {
+        background: #5a5a5a;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #6a6a6a;
+      }
+
+      .stats-panel {
+        background: #2a2a2a;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .gold {
+        color: #ffd700;
+        font-weight: bold;
+      }
+
+      .health {
+        color: #ff6b6b;
+      }
+      .mana {
+        color: #4dabf7;
+      }
+      .exp {
+        color: #69db7c;
+      }
+
+      .stat-bar {
+        width: 100%;
+        height: 10px;
+        background: #444;
+        border-radius: 5px;
+        margin: 5px 0;
+      }
+
+      .stat-bar-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.3s ease;
+      }
+
+      .health-bar {
+        background: #ff6b6b;
+      }
+      .mana-bar {
+        background: #4dabf7;
+      }
+      .exp-bar {
+        background: #69db7c;
+      }
+
+      .inventory-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        margin: 5px 0;
+        background: #3a3a3a;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      .inventory-item:hover {
+        background: #4a4a4a;
+      }
+
+      .skills-list {
+        margin-top: 15px;
+      }
+
+      .skill {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px;
+        margin: 5px 0;
+        background: #3a3a3a;
+        border-radius: 3px;
+      }
+
+      .skill-level {
+        color: #ffd700;
+      }
+
+      .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+        margin-top: 10px;
+      }
+
+      .action-buttons button {
+        width: 100%;
+      }
+
+      .gm {
+        background: #2c3e50;
+        color: #ecf0f1;
+        font-style: italic;
+        border-left: 3px solid #e74c3c;
+      }
+
+      .equipment-panel {
+        background: #2a2a2a;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .equipment-slots {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .equipment-slot {
+        background: #3a3a3a;
+        border-radius: 5px;
+        padding: 8px;
+        border: 1px solid #444;
+        transition: all 0.3s ease;
+      }
+
+      .equipment-slot:hover {
+        border-color: #666;
+      }
+
+      .slot-label {
+        font-size: 0.8em;
+        color: #888;
+        margin-bottom: 5px;
+      }
+
+      .slot-item {
+        font-size: 0.9em;
+        color: #fff;
+        padding: 5px;
+        background: #2a2a2a;
+        border-radius: 3px;
+        min-height: 20px;
+      }
+
+      .slot-item.equipped {
+        background: #2c3e50;
+        color: #ecf0f1;
+        border-left: 2px solid #3498db;
+      }
+
+      .slot-item.legendary {
+        border-left: 2px solid #e74c3c;
+        color: #e74c3c;
+      }
+
+      .slot-item.rare {
+        border-left: 2px solid #9b59b6;
+        color: #9b59b6;
+      }
+
+      .slot-item.uncommon {
+        border-left: 2px solid #2ecc71;
+        color: #2ecc71;
+      }
+
+      .feedback {
+        animation: pulse 0.5s ease-in-out;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+          background-color: #4a4a4a;
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .bonus-stats {
+        margin-top: 10px;
+        padding: 5px;
+        background: #2a2a2a;
+        border-radius: 3px;
+      }
+
+      .bonus-stats span {
+        display: inline-block;
+        margin-right: 10px;
+        font-size: 0.9em;
+      }
+
+      .attack {
+        color: #ff6b6b;
+      }
+      .defense {
+        color: #4dabf7;
+      }
+      .magic {
+        color: #9775fa;
+      }
+
+      .equipment-slot .slot-item:hover {
+        transform: scale(1.02);
+        transition: transform 0.2s ease;
+      }
+
+      .equipment-slot[data-empty="true"] {
+        opacity: 0.7;
+      }
+
+      .equipment-slot[data-empty="false"] {
+        opacity: 1;
+      }
+
+      .item-use-flash {
+        animation: useFlash 0.5s ease-in-out;
+      }
+
+      .heal-flash {
+        animation: healFlash 0.5s ease-in-out;
+      }
+
+      .mana-flash {
+        animation: manaFlash 0.5s ease-in-out;
+      }
+
+      @keyframes useFlash {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.02);
+          background: #3a3a3a;
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes healFlash {
+        0% {
+          background: #ff6b6b;
+        }
+        100% {
+          background: #ff6b6b;
+        }
+      }
+
+      @keyframes manaFlash {
+        0% {
+          background: #4dabf7;
+        }
+        100% {
+          background: #4dabf7;
+        }
+      }
+
+      .inventory-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .inventory-item:hover {
+        transform: translateX(5px);
+        background: #4a4a4a;
+      }
+
+      .inventory-item.selected {
+        background: #4a4a4a;
+        border-left: 3px solid #3498db;
+      }
+
+      .attack-animation {
+        animation: attackSlash 0.5s ease-in-out;
+      }
+
+      @keyframes attackSlash {
+        0% {
+          transform: translateX(0) rotate(0deg);
+        }
+        50% {
+          transform: translateX(10px) rotate(15deg);
+        }
+        100% {
+          transform: translateX(0) rotate(0deg);
+        }
+      }
+
+      .damage-text {
+        position: absolute;
+        color: #ff6b6b;
+        font-weight: bold;
+        animation: damageFloat 1s ease-out;
+        pointer-events: none;
+      }
+
+      @keyframes damageFloat {
+        0% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+      }
+
+      /* SCROLLBAR */
+      *::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+
+      *::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background-color: rgb(255, 255, 255, 0.1) !important;
+        outline: 1px solid rgb(255, 255, 255, 0.25) !important;
+      }
+
+      /* Add CSS for state change messages */
+      .message.state {
+        background: #2c3e50;
+        color: #ecf0f1;
+        font-weight: bold;
+        border-left: 3px solid #f39c12;
+        padding: 5px 10px;
+        margin: 5px 0;
+        font-size: 0.9em;
+        animation: state-change 0.5s ease-in-out;
+      }
+
+      @keyframes state-change {
+        0% { transform: translateX(-10px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎮 AI Quest</h1>
+
+    <div class="game-container">
+      <div class="main-area">
+        <div class="chat-window" id="chatWindow"></div>
+        <div class="input-area">
+          <input
+            type="text"
+            id="userInput"
+            placeholder="Enter your command..."
+          />
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <!-- Character Stats -->
+        <div class="stats-panel">
+          <h3>Character Stats</h3>
+          <div>Level: <span id="charLevel">1</span></div>
+          <div>Gold: <span id="goldCount" class="gold">100</span> 🪙</div>
+
+          <div>
+            Health: <span id="healthValue" class="health">100/100</span>
+          </div>
+          <div class="stat-bar">
+            <div
+              id="healthBar"
+              class="stat-bar-fill health-bar"
+              style="width: 100%"
+            ></div>
+          </div>
+
+          <div>Mana: <span id="manaValue" class="mana">50/50</span></div>
+          <div class="stat-bar">
+            <div
+              id="manaBar"
+              class="stat-bar-fill mana-bar"
+              style="width: 100%"
+            ></div>
+          </div>
+
+          <div>Experience: <span id="expValue" class="exp">0/100</span></div>
+          <div class="stat-bar">
+            <div
+              id="expBar"
+              class="stat-bar-fill exp-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Add Dice Panel -->
+        <div class="dice-panel">
+          <h3>Dice Rolls</h3>
+          <div class="dice-controls">
+            <button onclick="rollDice(20)">Roll D20</button>
+            <button onclick="rollDice(6)">Roll D6</button>
+            <button onclick="rollDice(4)">Roll D4</button>
+          </div>
+          <div class="dice-history" id="diceHistory"></div>
+        </div>
+
+        <!-- Equipment -->
+        <div class="equipment-panel">
+          <h3>Equipment</h3>
+          <div class="equipment-slots">
+            <div class="equipment-slot" data-slot="head">
+              <div class="slot-label">Head</div>
+              <div class="slot-item" id="head-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="neck">
+              <div class="slot-label">Neck</div>
+              <div class="slot-item" id="neck-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="chest">
+              <div class="slot-label">Chest</div>
+              <div class="slot-item" id="chest-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="mainHand">
+              <div class="slot-label">Main Hand</div>
+              <div class="slot-item" id="mainHand-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="offHand">
+              <div class="slot-label">Off Hand</div>
+              <div class="slot-item" id="offHand-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="arms">
+              <div class="slot-label">Arms</div>
+              <div class="slot-item" id="arms-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="legs">
+              <div class="slot-label">Legs</div>
+              <div class="slot-item" id="legs-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="feet">
+              <div class="slot-label">Feet</div>
+              <div class="slot-item" id="feet-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="ring1">
+              <div class="slot-label">Ring 1</div>
+              <div class="slot-item" id="ring1-slot">Empty</div>
+            </div>
+            <div class="equipment-slot" data-slot="ring2">
+              <div class="slot-label">Ring 2</div>
+              <div class="slot-item" id="ring2-slot">Empty</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="inventory">
+          <h3>Inventory</h3>
+          <div id="inventoryList"></div>
+          <div class="action-buttons">
+            <button onclick="useItem()">Use Item</button>
+            <button onclick="dropItem()">Drop Item</button>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="skills-list">
+          <h3>Skills</h3>
+          <div id="skillsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3000";
+      const player_id = "player_" + Math.random().toString(36).substr(2, 9);
+      let chatHistory = [];
+
+      // Game state
+      const gameState = {
+        level: 1,
+        gold: 100,
+        health: 100,
+        maxHealth: 100,
+        mana: 50,
+        maxMana: 50,
+        exp: 0,
+        maxExp: 100,
+        inventory: [
+          { id: 1, name: "Health Potion", quantity: 3, type: "consumable" },
+          { id: 2, name: "Iron Sword", quantity: 1, type: "weapon" },
+          { id: 3, name: "Leather Armor", quantity: 1, type: "armor" },
+        ],
+        skills: [
+          { name: "Swordsmanship", level: 1, exp: 0 },
+          { name: "Alchemy", level: 1, exp: 0 },
+          { name: "Magic", level: 1, exp: 0 },
+        ],
+        equipment: {
+          head: null,
+          neck: null,
+          chest: null,
+          mainHand: null,
+          offHand: null,
+          arms: null,
+          legs: null,
+          feet: null,
+          ring1: null,
+          ring2: null,
+        },
+      };
+
+      // Add auto-save functionality
+      let autoSaveInterval;
+
+      function startAutoSave() {
+        // Save every 30 seconds
+        autoSaveInterval = setInterval(() => {
+          saveGameState();
+          console.log("Auto-saved game state");
+        }, 30000);
+      }
+
+      function stopAutoSave() {
+        clearInterval(autoSaveInterval);
+      }
+
+      async function sendMessage() {
+        const input = document.getElementById("userInput");
+        const message = input.value.trim();
+        if (!message) return;
+
+        displayMessage("user", message);
+        input.value = "";
+
+        // Check for direct equipment commands before sending to API
+        const equipMatch = message.match(/^equip\s+(.+)$/i);
+        if (equipMatch) {
+            const itemNameInput = equipMatch[1].toLowerCase();
+            
+            // Log inventory for debugging
+            debugLog("Current inventory:", gameState.inventory);
+            
+            // Try different matching strategies
+            let item = null;
+            
+            // 1. Try exact match
+            item = gameState.inventory.find(i => 
+                i.name.toLowerCase() === itemNameInput);
+                
+            // 2. Try without "my" or "the"
+            if (!item) {
+                const cleanName = itemNameInput.replace(/^(my|the)\s+/i, '');
+                item = gameState.inventory.find(i => 
+                    i.name.toLowerCase() === cleanName);
+            }
+            
+            // 3. Try partial match
+            if (!item) {
+                item = gameState.inventory.find(i => 
+                    i.name.toLowerCase().includes(itemNameInput) || 
+                    itemNameInput.includes(i.name.toLowerCase()));
+            }
+            
+            // 4. Try matching by type
+            if (!item && (itemNameInput.includes("sword") || itemNameInput.includes("weapon"))) {
+                item = gameState.inventory.find(i => i.type === "weapon");
+            }
+            
+            if (item) {
+                // Directly equip the item
+                displayMessage("system", `You equip your ${item.name}.`);
+                equipItem(item, getDefaultSlot(item));
+                
+                // Still send to API for narrative response
+            } else {
+                displayMessage("system", `You don't have a ${itemNameInput} in your inventory.`);
+                
+                // List available items
+                const weapons = gameState.inventory.filter(i => i.type === "weapon");
+                if (weapons.length > 0) {
+                    displayMessage("system", `Available weapons: ${weapons.map(w => w.name).join(', ')}`);
+                }
+            }
+        }
+
+        // Check for debug commands
+        if (message.toLowerCase() === "debug inventory" || message.toLowerCase() === "show inventory") {
+            displayMessage("system", "Current Inventory:");
+            gameState.inventory.forEach(item => {
+                displayMessage("system", `- ${item.name} (${item.type})`);
+            });
+            return; // Don't send to API
+        }
+
+        if (message.toLowerCase() === "debug equipment" || message.toLowerCase() === "show equipment") {
+            displayMessage("system", "Current Equipment:");
+            Object.entries(gameState.equipment).forEach(([slot, item]) => {
+                if (item) {
+                    displayMessage("system", `- ${slot}: ${item.name}`);
+                } else {
+                    displayMessage("system", `- ${slot}: Empty`);
+                }
+            });
+            return; // Don't send to API
+        }
+
+        if (message.toLowerCase() === "equip best" || message.toLowerCase() === "auto equip") {
+            // Find best weapon
+            const weapons = gameState.inventory.filter(i => i.type === "weapon");
+            if (weapons.length > 0) {
+                const bestWeapon = weapons[0]; // For now just take the first one
+                equipItem(bestWeapon, "mainHand");
+            }
+            
+            // Find armor pieces
+            const armor = gameState.inventory.filter(i => i.type === "armor");
+            armor.forEach(item => {
+                equipItem(item, getArmorSlot(item.name));
+            });
+            
+            displayMessage("system", "Equipped best available items.");
+            return; // Don't send to API
+        }
+
+        try {
+          debugLog("Sending message:", message);
+          
+          // Create a conversation history to send to the API
+          // This is crucial for maintaining context
+          const conversationHistory = [];
+          
+          // Add system message first (if exists)
+          const systemMessage = chatHistory.find(msg => msg.role === "system" && 
+              msg.content.includes("Welcome to AI Quest"));
+          if (systemMessage) {
+              conversationHistory.push(systemMessage);
+          }
+          
+          // Add recent conversation history (last 10 messages)
+          // Filter out system messages that aren't part of the narrative
+          const recentMessages = chatHistory
+              .filter(msg => msg.role !== "state" && 
+                     !(msg.role === "system" && msg.content.startsWith("Error:")))
+              .slice(-10);
+          
+          conversationHistory.push(...recentMessages);
+          
+          // Add the current message
+          conversationHistory.push({ role: "user", content: message });
+          
+          debugLog("Sending conversation history:", conversationHistory);
+
+          const response = await fetch(`${API_URL}/chat`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  player_id,
+                  messages: conversationHistory,
+                  gameState,
+              }),
+          });
+
+          const data = await response.json();
+          debugLog("Received response:", data);
+
+          if (data.success) {
+              // Display the narrative
+              displayMessage("gm", data.response.narrative);
+
+              // Process commands
+              if (data.response.commands && Array.isArray(data.response.commands)) {
+                  debugLog("Processing commands:", data.response.commands);
+                  for (const cmd of data.response.commands) {
+                      await processGameCommand(cmd);
+                  }
+              }
+
+              // Save state after all commands are processed
+              await saveGameState();
+          } else {
+              throw new Error(data.error || "Unknown error");
+          }
+        } catch (error) {
+            console.error("Error in sendMessage:", error);
+            displayMessage("system", `Error: ${error.message}`);
+        }
+      }
+
+      function displayMessage(role, content, addToHistory = true) {
+        const chatWindow = document.getElementById("chatWindow");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${role}`;
+        messageDiv.textContent = content;
+        chatWindow.appendChild(messageDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        
+        // Only add to history if specified (to avoid duplicates when restoring)
+        if (addToHistory) {
+            chatHistory.push({ role, content });
+        }
+      }
+
+      function updateStats() {
+        document.getElementById("charLevel").textContent = gameState.level;
+        document.getElementById("goldCount").textContent = gameState.gold;
+
+        document.getElementById(
+          "healthValue"
+        ).textContent = `${gameState.health}/${gameState.maxHealth}`;
+        document.getElementById("healthBar").style.width = `${
+          (gameState.health / gameState.maxHealth) * 100
+        }%`;
+
+        document.getElementById(
+          "manaValue"
+        ).textContent = `${gameState.mana}/${gameState.maxMana}`;
+        document.getElementById("manaBar").style.width = `${
+          (gameState.mana / gameState.maxMana) * 100
+        }%`;
+
+        document.getElementById(
+          "expValue"
+        ).textContent = `${gameState.exp}/${gameState.maxExp}`;
+        document.getElementById("expBar").style.width = `${
+          (gameState.exp / gameState.maxExp) * 100
+        }%`;
+      }
+
+      function updateInventory() {
+        const inventoryList = document.getElementById("inventoryList");
+        inventoryList.innerHTML = "";
+
+        gameState.inventory.forEach((item) => {
+          const itemElement = document.createElement("div");
+          itemElement.className = "inventory-item";
+          itemElement.innerHTML = `
+                    <span>${item.name} ${
+            item.quantity > 1 ? `(${item.quantity})` : ""
+          }</span>
+                    <span>${item.type}</span>
+                `;
+          itemElement.onclick = () => selectItem(item.id);
+          inventoryList.appendChild(itemElement);
+        });
+      }
+
+      function updateSkills() {
+        const skillsList = document.getElementById("skillsList");
+        skillsList.innerHTML = "";
+
+        gameState.skills.forEach((skill) => {
+          const skillElement = document.createElement("div");
+          skillElement.className = "skill";
+          skillElement.innerHTML = `
+                    <span>${skill.name}</span>
+                    <span class="skill-level">Lvl ${skill.level}</span>
+                `;
+          skillsList.appendChild(skillElement);
+        });
+      }
+
+      let selectedItemId = null;
+
+      function selectItem(itemId) {
+        selectedItemId = itemId;
+        document.querySelectorAll(".inventory-item").forEach((item) => {
+          item.style.background = "#3a3a3a";
+        });
+        event.currentTarget.style.background = "#4a4a4a";
+      }
+
+      function useItem() {
+        debugLog("Attempting to use item:", selectedItemId);
+
+        if (!selectedItemId) {
+          displayMessage("system", "Please select an item first");
+          return;
+        }
+
+        const item = gameState.inventory.find((i) => i.id === selectedItemId);
+        if (!item) {
+          displayMessage("system", "Item not found");
+          return;
+        }
+
+        debugLog("Using item:", item);
+
+        try {
+          switch (item.type) {
+            case "consumable":
+              useConsumable(item);
+              break;
+
+            case "weapon":
+              equipItem(item, "mainHand");
+              break;
+
+            case "armor":
+              equipItem(item, getArmorSlot(item.name));
+              break;
+
+            case "accessory":
+              equipItem(item, getAccessorySlot());
+              break;
+
+            default:
+              displayMessage("system", `Cannot use item of type: ${item.type}`);
+              return;
+          }
+
+          // Play use animation
+          playItemUseAnimation(item.type);
+        } catch (error) {
+          console.error("Error using item:", error);
+          displayMessage("system", `Error using item: ${error.message}`);
+        }
+      }
+
+      function useConsumable(item) {
+        debugLog("Using consumable:", item);
+
+        switch (item.name) {
+          case "Health Potion":
+            const healAmount = 30;
+            modifyPlayerStat("health", healAmount, `Used ${item.name}`);
+            playHealAnimation();
+            break;
+
+          case "Mana Potion":
+            const manaAmount = 20;
+            modifyPlayerStat("mana", manaAmount, `Used ${item.name}`);
+            playManaAnimation();
+            break;
+
+          default:
+            displayMessage("system", `Unknown consumable: ${item.name}`);
+            return;
+        }
+
+        // Reduce quantity or remove item
+        item.quantity--;
+        if (item.quantity <= 0) {
+          gameState.inventory = gameState.inventory.filter(
+            (i) => i.id !== item.id
+          );
+          selectedItemId = null;
+          displayStateChange("item", item.name, -1, "Used last one");
+        } else {
+          displayStateChange("item", item.name, -1, `${item.quantity} remaining`);
+        }
+
+        updateInventory();
+      }
+
+      function equipItem(item, slot) {
+        if (!item) {
+          console.error("Attempted to equip null item");
+          return;
+        }
+        
+        debugLog("Equipping item:", item, "to slot:", slot);
+        
+        // Unequip current item in slot if any
+        const currentlyEquipped = gameState.equipment[slot];
+        if (currentlyEquipped) {
+          gameState.inventory.push(currentlyEquipped);
+          displayStateChange("unequip", currentlyEquipped.name, 1, slot);
+        }
+
+        // Remove from inventory and equip
+        gameState.inventory = gameState.inventory.filter(
+          (i) => i.id !== item.id
+        );
+        
+        // Make a copy of the item to avoid reference issues
+        gameState.equipment[slot] = {...item, slot: slot};
+
+        displayStateChange("equip", item.name, 1, slot);
+        addVisualFeedback(slot, "equip");
+        
+        // Force UI updates
+        updateEquipment();
+        updateInventory();
+        
+        // Update character bonuses based on equipment
+        const bonuses = calculateEquipmentBonuses();
+        updateCharacterBonuses(bonuses);
+        
+        // Log the equipment state to verify
+        debugLog("Equipment after equip:", gameState.equipment);
+      }
+
+      function getArmorSlot(itemName) {
+        const armorSlots = {
+          "Leather Armor": "chest",
+          "Leather Boots": "feet",
+          "Leather Gloves": "arms",
+          "Leather Helmet": "head",
+          "Leather Pants": "legs",
+          // Add more armor mappings
+        };
+        return armorSlots[itemName] || "chest";
+      }
+
+      function getAccessorySlot() {
+        // Check which accessory slot is empty
+        if (!gameState.equipment.ring1) return "ring1";
+        if (!gameState.equipment.ring2) return "ring2";
+        if (!gameState.equipment.neck) return "neck";
+        return "ring1"; // Default to replacing ring1 if all slots are full
+      }
+
+      // Add visual feedback animations
+      function playItemUseAnimation(type) {
+        const inventoryList = document.getElementById("inventoryList");
+        inventoryList.classList.add("item-use-flash");
+        setTimeout(() => {
+          inventoryList.classList.remove("item-use-flash");
+        }, 500);
+      }
+
+      function playHealAnimation() {
+        const healthBar = document.getElementById("healthBar");
+        healthBar.classList.add("heal-flash");
+        setTimeout(() => {
+          healthBar.classList.remove("heal-flash");
+        }, 500);
+      }
+
+      function playManaAnimation() {
+        const manaBar = document.getElementById("manaBar");
+        manaBar.classList.add("mana-flash");
+        setTimeout(() => {
+          manaBar.classList.remove("mana-flash");
+        }, 500);
+      }
+
+      function dropItem() {
+        if (!selectedItemId) {
+          displayMessage("system", "Please select an item first");
+          return;
+        }
+
+        const item = gameState.inventory.find((i) => i.id === selectedItemId);
+        gameState.inventory = gameState.inventory.filter(
+          (i) => i.id !== selectedItemId
+        );
+        displayMessage("system", `Dropped ${item.name}`);
+        updateInventory();
+      }
+
+      async function saveGameState() {
+        try {
+            // Make sure we're saving the complete chat history
+            debugLog("Saving chat history with length:", chatHistory.length);
+            
+            await fetch(`${API_URL}/memory`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    key: `player_${player_id}_state`,
+                    value: {
+                        chatHistory: chatHistory,
+                        gameState: gameState
+                    }
+                })
+            });
+        } catch (error) {
+            console.error("Error saving game state:", error);
+        }
+      }
+
+      async function loadGameState() {
+        try {
+            const response = await fetch(`${API_URL}/memory/player_${player_id}_state`);
+            
+            // If the response is not ok (like 404), just initialize a new game
+            if (!response.ok) {
+                console.log("No saved game found. Starting new game.");
+                return; // Just exit the function and use the default state
+            }
+            
+            const data = await response.json();
+            if (data.value) {
+                // Clear existing chat window first
+                const chatWindow = document.getElementById("chatWindow");
+                chatWindow.innerHTML = '';
+                
+                // Restore chat history
+                if (data.value.chatHistory && Array.isArray(data.value.chatHistory)) {
+                    chatHistory = [...data.value.chatHistory]; // Make a copy to avoid reference issues
+                    
+                    // Display all messages from history
+                    chatHistory.forEach(msg => {
+                        displayMessage(msg.role, msg.content, false); // false = don't add to history again
+                    });
+                    
+                    debugLog("Restored chat history with length:", chatHistory.length);
+                } else {
+                    chatHistory = [];
+                }
+                
+                // Restore game state
+                if (data.value.gameState) {
+                    Object.assign(gameState, data.value.gameState);
+                }
+                
+                // Update UI
+                updateStats();
+                updateInventory();
+                updateSkills();
+                updateEquipment();
+                
+                // Scroll chat to bottom
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        } catch (error) {
+            console.log("Starting new game (error loading saved game):", error.message);
+            // Just continue with the default game state
+        }
+      }
+
+      // Game mechanics functions
+      function gainExperience(amount, reason = "") {
+        modifyPlayerStat("exp", amount, reason);
+      }
+
+      function levelUp() {
+        const oldLevel = gameState.level;
+        gameState.level++;
+        gameState.exp = 0;
+        gameState.maxHealth += 10;
+        gameState.maxMana += 5;
+        gameState.health = gameState.maxHealth;
+        gameState.mana = gameState.maxMana;
+        
+        displayStateChange("skill", "Character Level", gameState.level, "Level Up!");
+        displayMessage("system", `🎉 Level Up! You are now level ${gameState.level}!`);
+        
+        // Show stat increases
+        displayStateChange("heal", "Max Health", 10, "Level Up");
+        displayStateChange("mana", "Max Mana", 5, "Level Up");
+        
+        updateStats();
+      }
+
+      function gainGold(amount) {
+        gameState.gold += amount;
+        updateStats();
+      }
+
+      function spendGold(amount) {
+        if (gameState.gold >= amount) {
+          gameState.gold -= amount;
+          updateStats();
+          return true;
+        }
+        return false;
+      }
+
+      // Combat system (basic)
+      async function performAttack(target) {
+        const damage = 10 + Math.floor(Math.random() * 5);
+        displayMessage("system", `You attack ${target} for ${damage} damage!`);
+        gainExperience(5);
+
+        // Random loot
+        if (Math.random() > 0.7) {
+          const goldFound = Math.floor(Math.random() * 10) + 1;
+          gainGold(goldFound);
+          displayMessage("system", `You found ${goldFound} gold!`);
+        }
+      }
+
+      // Initialize game
+      function initGame() {
+        updateStats();
+        updateInventory();
+        updateSkills();
+        displayMessage("system", "Welcome to AI Quest! Type your commands to begin...");
+        
+        loadGameState().then(() => {
+          // After loading game state, check starting equipment
+          checkStartingEquipment();
+          
+          // Start auto-save
+          startAutoSave();
+        });
+        
+        // Add event listener for page unload to save state
+        window.addEventListener('beforeunload', () => {
+          saveGameState();
+        });
+      }
+
+      // Handle enter key in input
+      document.getElementById("userInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      // Command parser (basic)
+      function parseCommand(message) {
+        const words = message.toLowerCase().split(" ");
+        const command = words[0];
+        const target = words.slice(1).join(" ");
+
+        switch (command) {
+          case "attack":
+            if (target) performAttack(target);
+            break;
+          case "inventory":
+            displayMessage("system", "Opening inventory...");
+            break;
+          case "stats":
+            displayMessage(
+              "system",
+              `Level: ${gameState.level}, Health: ${gameState.health}/${gameState.maxHealth}, Gold: ${gameState.gold}`
+            );
+            break;
+          default:
+            return false;
+        }
+        return true;
+      }
+
+      // Add debug logging
+      function debugLog(message, data) {
+        console.log(`DEBUG: ${message}`, data);
+      }
+
+      // Update the command processor with better error handling and logging
+      function processGameCommand(cmd) {
+        debugLog("Processing command:", cmd);
+
+        try {
+          switch (cmd.action) {
+            case "ROLL_DICE":
+              try {
+                const sides = cmd.sides || 20;
+                const result = rollDice(sides);
+                const difficulty = cmd.difficulty || 10;
+                
+                // Add roll to history with reason
+                addDiceRoll(result, sides, 
+                    result === 20 ? 'critical-success' : 
+                    result === 1 ? 'critical-fail' : '', 
+                    cmd.reason || 'Check');
+                
+                // Determine outcome tier for D20
+                let outcomeTier = "";
+                if (sides === 20) {
+                    if (result === 20) outcomeTier = "Critical Success!";
+                    else if (result === 1) outcomeTier = "Critical Failure!";
+                    else if (result >= 16) outcomeTier = "Great Success!";
+                    else if (result >= 11) outcomeTier = "Moderate Success";
+                    else if (result >= 6) outcomeTier = "Poor Outcome";
+                    else outcomeTier = "Very Bad Outcome";
+                }
+                
+                // Display roll result with outcome tier
+                displayMessage("system", `${cmd.reason || 'Roll'}: ${result} ${outcomeTier ? `(${outcomeTier})` : ''}`);
+                
+                // Handle success/failure outcomes
+                if (cmd.difficulty) {
+                    const success = result >= cmd.difficulty;
+                    
+                    if (success && cmd.onSuccess) {
+                        displayMessage("system", `Success! (${result} ≥ ${cmd.difficulty})`);
+                        processGameCommand(cmd.onSuccess);
+                    } else if (!success && cmd.onFailure) {
+                        displayMessage("system", `Failure! (${result} < ${cmd.difficulty})`);
+                        processGameCommand(cmd.onFailure);
+                    }
+                }
+                
+                // Special effects for critical success/failure
+                if (result === 20 && !cmd.onSuccess) {
+                    // Default critical success effects
+                    const bonusXP = Math.floor(Math.random() * 20) + 10;
+                    displayMessage("system", `Critical success grants you ${bonusXP} bonus XP!`);
+                    gainExperience(bonusXP);
+                } else if (result === 1 && !cmd.onFailure) {
+                    // Default critical failure effects
+                    const penalty = Math.floor(Math.random() * 5) + 1;
+                    displayMessage("system", `Critical failure costs you ${penalty} health!`);
+                    modifyPlayerStat('health', -penalty);
+                }
+              } catch (error) {
+                console.error("Dice roll error:", error);
+                // Fallback to a basic roll
+                const result = Math.floor(Math.random() * 20) + 1;
+                displayMessage("system", `Roll result: ${result}`);
+              }
+              break;
+              
+            case "COMBAT_ROLL":
+              // Handle attack rolls with target AC
+              const attackRoll = rollDice(20);
+              const skillBonus = Math.floor(getSkillBonus(cmd.skill || "Swordsmanship") / 2);
+              const totalAttack = attackRoll + skillBonus;
+              
+              // Add roll to history
+              addDiceRoll(attackRoll, 20, 
+                  attackRoll === 20 ? 'critical-success' : 
+                  attackRoll === 1 ? 'critical-fail' : '', 
+                  'Attack Roll');
+              
+              let combatMessage = `Attack Roll: ${attackRoll} + ${skillBonus} = ${totalAttack}\n`;
+              let hit = false;
+              
+              if (attackRoll === 20) {
+                  combatMessage += `Critical Hit! Double damage!\n`;
+                  hit = true;
+              } else if (attackRoll === 1) {
+                  combatMessage += `Critical Miss! You stumble and hurt yourself!\n`;
+                  modifyPlayerStat('health', -5);
+                  displayMessage("system", combatMessage);
+                  return;
+              } else if (cmd.targetAC) {
+                  hit = totalAttack >= cmd.targetAC;
+                  combatMessage += hit ? 
+                      `Hit! (${totalAttack} ≥ ${cmd.targetAC})\n` : 
+                      `Miss! (${totalAttack} < ${cmd.targetAC})\n`;
+              } else {
+                  hit = true; // Auto-hit if no AC specified
+              }
+              
+              if (hit) {
+                  // Roll for damage
+                  const damageDie = cmd.damageDie || 6;
+                  const damageRoll = rollDice(damageDie);
+                  
+                  // Add damage roll to history
+                  addDiceRoll(damageRoll, damageDie, '', 'Damage Roll');
+                  
+                  const baseDamage = cmd.baseDamage || getWeaponDamage(gameState.equipment.mainHand);
+                  let totalDamage = baseDamage + damageRoll;
+                  
+                  if (attackRoll === 20) totalDamage *= 2;
+                  
+                  combatMessage += `Damage Roll: ${damageRoll} + ${baseDamage} = ${totalDamage}`;
+                  
+                  // Apply any effects from the hit
+                  if (cmd.onHit) {
+                      processGameCommand(cmd.onHit);
+                  } else {
+                      // Default XP gain for successful hit
+                      gainExperience(10);
+                  }
+              }
+              
+              displayMessage("system", combatMessage);
+              playAttackAnimation();
+              break;
+              
+            case "EQUIP":
+              // Find the item in inventory by name (case insensitive)
+              const itemToEquip = gameState.inventory.find(item => 
+                  item.name.toLowerCase() === cmd.item.toLowerCase());
+              
+              if (!itemToEquip) {
+                  // Try to find by partial match
+                  const partialMatch = gameState.inventory.find(item => 
+                      item.name.toLowerCase().includes(cmd.item.toLowerCase()));
+                  
+                  if (partialMatch) {
+                      equipItem(partialMatch, cmd.slot || getDefaultSlot(partialMatch));
+                  } else {
+                      displayMessage("system", `Item "${cmd.item}" not found in inventory.`);
+                  }
+              } else {
+                  equipItem(itemToEquip, cmd.slot || getDefaultSlot(itemToEquip));
+              }
+              break;
+
+            case "COMBAT":
+              performCombatAction(cmd);
+              break;
+
+            case "MODIFY_STAT":
+              modifyPlayerStat(cmd.stat, cmd.value);
+              break;
+
+            case "ADD_ITEM":
+              const newItem = {
+                id: Date.now(),
+                name: cmd.item,
+                quantity: cmd.quantity,
+                type: cmd.type,
+                rarity: cmd.rarity || "common",
+              };
+              gameState.inventory.push(newItem);
+              displayStateChange("item", newItem.name, newItem.quantity, `Added to inventory`);
+              break;
+
+            case "REMOVE_ITEM":
+              gameState.inventory = gameState.inventory.filter(
+                (item) => item.name !== cmd.item
+              );
+              displayStateChange("item", cmd.item, -1, "Removed from inventory");
+              break;
+
+            case "SKILL_UP":
+              const skill = gameState.skills.find((s) => s.name === cmd.skill);
+              if (skill) {
+                skill.level++;
+                displayStateChange("skill", skill.name, skill.level, "Skill improved");
+              }
+              break;
+          }
+
+          // Update UI after successful command
+          updateStats();
+          updateInventory();
+          updateEquipment();
+          updateSkills();
+          saveGameState();
+        } catch (error) {
+          console.error("Error processing command:", error);
+          displayMessage("system", `Error: ${error.message}`);
+        }
+      }
+
+      // Update the equipment display function with error handling
+      function updateEquipment() {
+        try {
+          debugLog("Updating equipment display", gameState.equipment);
+          
+          // First, ensure all slots are properly initialized
+          const slots = ["head", "neck", "chest", "mainHand", "offHand", "arms", "legs", "feet", "ring1", "ring2"];
+          
+          slots.forEach(slot => {
+            const slotElement = document.getElementById(`${slot}-slot`);
+            if (!slotElement) {
+              console.error(`Slot element not found: ${slot}`);
+              return;
+            }
+            
+            const item = gameState.equipment[slot];
+            
+            if (item) {
+              slotElement.textContent = item.name;
+              slotElement.className = `slot-item equipped ${item.rarity || ""}`;
+              debugLog(`Updated slot ${slot} with item:`, item);
+              
+              // Set data attribute for visual feedback
+              const slotContainer = slotElement.closest('.equipment-slot');
+              if (slotContainer) {
+                slotContainer.setAttribute('data-empty', 'false');
+              }
+            } else {
+              slotElement.textContent = "Empty";
+              slotElement.className = "slot-item";
+              debugLog(`Cleared slot ${slot}`);
+              
+              // Set data attribute for visual feedback
+              const slotContainer = slotElement.closest('.equipment-slot');
+              if (slotContainer) {
+                slotContainer.setAttribute('data-empty', 'true');
+              }
+            }
+          });
+          
+          // Update character bonuses based on equipment
+          const bonuses = calculateEquipmentBonuses();
+          updateCharacterBonuses(bonuses);
+        } catch (error) {
+          console.error("Error updating equipment display:", error);
+        }
+      }
+
+      // Add visual feedback for equipment changes
+      function addVisualFeedback(slot, action) {
+        const slotElement = document.getElementById(`${slot}-slot`);
+        if (slotElement) {
+          slotElement.classList.add("feedback");
+          setTimeout(() => {
+            slotElement.classList.remove("feedback");
+          }, 500);
+        }
+      }
+
+      // Add these new helper functions
+      function getBonusDescription(item) {
+        const bonuses = {
+          "Iron Sword": "+5 Attack",
+          "Leather Armor": "+3 Defense",
+          // Add more items and their bonuses
+        };
+        return bonuses[item.name] || "";
+      }
+
+      function calculateEquipmentBonuses() {
+        const bonuses = {
+          attack: 0,
+          defense: 0,
+          magic: 0,
+        };
+
+        Object.values(gameState.equipment).forEach((item) => {
+          if (item) {
+            switch (item.name) {
+              case "Iron Sword":
+                bonuses.attack += 5;
+                break;
+              case "Leather Armor":
+                bonuses.defense += 3;
+                break;
+              // Add more items
+            }
+          }
+        });
+
+        return bonuses;
+      }
+
+      function updateCharacterBonuses(bonuses) {
+        // Update the UI to show current bonuses
+        const statsPanel = document.querySelector(".stats-panel");
+        let bonusDiv = document.getElementById("equipment-bonuses");
+
+        if (!bonusDiv) {
+          bonusDiv = document.createElement("div");
+          bonusDiv.id = "equipment-bonuses";
+          statsPanel.appendChild(bonusDiv);
+        }
+
+        bonusDiv.innerHTML = `
+                <div class="bonus-stats">
+                    <span class="attack">Attack: +${bonuses.attack}</span>
+                    <span class="defense">Defense: +${bonuses.defense}</span>
+                    <span class="magic">Magic: +${bonuses.magic}</span>
+                </div>
+            `;
+      }
+
+      // Add combat system
+      function performCombatAction(cmd) {
+        debugLog("Performing combat action:", cmd);
+
+        try {
+            // Check if weapon is equipped
+            const weapon = gameState.equipment.mainHand;
+            
+            // If no weapon is equipped, auto-equip the first weapon in inventory if available
+            if (!weapon) {
+                const firstWeapon = gameState.inventory.find(item => item.type === "weapon");
+                
+                if (firstWeapon) {
+                    // Auto-equip the weapon
+                    displayMessage("system", `You quickly draw your ${firstWeapon.name}!`);
+                    
+                    // Safely equip the weapon
+                    try {
+                        // Unequip current item in slot if any
+                        const currentlyEquipped = gameState.equipment["mainHand"];
+                        if (currentlyEquipped) {
+                            gameState.inventory.push(currentlyEquipped);
+                        }
+
+                        // Remove from inventory and equip
+                        gameState.inventory = gameState.inventory.filter(i => i.id !== firstWeapon.id);
+                        gameState.equipment["mainHand"] = firstWeapon;
+                        
+                        updateEquipment();
+                        updateInventory();
+                    } catch (equipError) {
+                        console.error("Error equipping weapon:", equipError);
+                    }
+                    
+                    // Now weapon should be equipped
+                    const equippedWeapon = gameState.equipment.mainHand;
+                    processCombatWithWeapon(cmd, equippedWeapon);
+                } else {
+                    // No weapon available - use fists
+                    displayMessage("system", "You have no weapon equipped! Fighting with bare hands.");
+                    
+                    // Create a temporary "fists" weapon
+                    const fists = {
+                        name: "Fists",
+                        damage: 2,
+                        type: "natural"
+                    };
+                    
+                    processCombatWithWeapon(cmd, fists);
+                }
+            } else {
+                // Weapon is already equipped
+                processCombatWithWeapon(cmd, weapon);
+            }
+        } catch (error) {
+            console.error("Combat error:", error);
+            displayMessage("system", "You attempt to attack but something goes wrong. Try again!");
+            
+            // Fallback to basic attack
+            const damageRoll = rollDice(4);
+            displayMessage("system", `You manage to deal ${damageRoll} damage with a basic attack.`);
+        }
+      }
+
+      // Helper function to process combat with a weapon
+      function processCombatWithWeapon(cmd, weapon) {
+        // Handle attack rolls with target AC
+        const attackRoll = rollDice(20);
+        const skillBonus = Math.floor(getSkillBonus(cmd.skill || "Swordsmanship") / 2);
+        const totalAttack = attackRoll + skillBonus;
+        
+        // Add roll to history
+        addDiceRoll(attackRoll, 20, 
+            attackRoll === 20 ? 'critical-success' : 
+            attackRoll === 1 ? 'critical-fail' : '', 
+            'Attack Roll');
+        
+        let combatMessage = `Attack Roll: ${attackRoll} + ${skillBonus} = ${totalAttack}\n`;
+        let hit = false;
+        
+        if (attackRoll === 20) {
+            combatMessage += `Critical Hit! Double damage!\n`;
+            hit = true;
+        } else if (attackRoll === 1) {
+            combatMessage += `Critical Miss! You stumble and hurt yourself!\n`;
+            modifyPlayerStat('health', -5);
+            displayMessage("system", combatMessage);
+            return;
+        } else if (cmd.targetAC) {
+            hit = totalAttack >= cmd.targetAC;
+            combatMessage += hit ? 
+                `Hit! (${totalAttack} ≥ ${cmd.targetAC})\n` : 
+                `Miss! (${totalAttack} < ${cmd.targetAC})\n`;
+        } else {
+            hit = true; // Auto-hit if no AC specified
+        }
+        
+        if (hit) {
+            // Roll for damage
+            const damageDie = cmd.damageDie || 6;
+            const damageRoll = rollDice(damageDie);
+            
+            // Add damage roll to history
+            addDiceRoll(damageRoll, damageDie, '', 'Damage Roll');
+            
+            // Get base damage from weapon or command
+            const baseDamage = cmd.baseDamage || getWeaponDamage(weapon);
+            let totalDamage = baseDamage + damageRoll;
+            
+            if (attackRoll === 20) totalDamage *= 2;
+            
+            combatMessage += `Damage Roll: ${damageRoll} + ${baseDamage} = ${totalDamage}`;
+            
+            // Show enemy damage in chat
+            displayStateChange("damage", cmd.target || "Enemy", totalDamage, `${weapon.name} attack`);
+            
+            // Apply any effects from the hit
+            if (cmd.onHit) {
+                processGameCommand(cmd.onHit);
+            } else {
+                // Default XP gain for successful hit
+                gainExperience(10);
+            }
+        }
+        
+        displayMessage("system", combatMessage);
+        playAttackAnimation();
+      }
+
+      // Update the getWeaponDamage function to safely handle null/undefined weapons
+      function getWeaponDamage(weapon) {
+        // Safety check - if weapon is null/undefined, return default damage
+        if (!weapon) return 2; // Default to fist damage
+        
+        // If weapon has a predefined damage value, use it
+        if (weapon.damage) return weapon.damage;
+        
+        // Otherwise use the lookup table
+        const weaponDamage = {
+            "Iron Sword": 10,
+            "Wooden Sword": 5,
+            "Steel Sword": 15,
+            "Fists": 2,
+            // Add more weapons...
+        };
+        
+        return weaponDamage[weapon.name] || 3; // Default to 3 if unknown weapon
+      }
+
+      function getSkillBonus(skillName) {
+        const skill = gameState.skills.find((s) => s.name === skillName);
+        return skill ? skill.level : 0;
+      }
+
+      function modifyPlayerStat(stat, value, reason = "") {
+        debugLog("Modifying stat:", stat, "by:", value);
+        
+        const oldValue = gameState[stat];
+        
+        switch (stat) {
+            case "health":
+                gameState.health = Math.min(
+                    Math.max(0, gameState.health + value),
+                    gameState.maxHealth
+                );
+                
+                if (value > 0) {
+                    displayStateChange("heal", "You", value, reason);
+                } else if (value < 0) {
+                    displayStateChange("damage", "You", Math.abs(value), reason);
+                }
+                break;
+                
+            case "mana":
+                gameState.mana = Math.min(
+                    Math.max(0, gameState.mana + value),
+                    gameState.maxMana
+                );
+                displayStateChange("mana", "You", value, reason);
+                break;
+                
+            case "exp":
+                const oldExp = gameState.exp;
+                gameState.exp += value;
+                displayStateChange("exp", "You", value, reason);
+                
+                if (gameState.exp >= gameState.maxExp) {
+                    levelUp();
+                }
+                break;
+                
+            case "gold":
+                gameState.gold = Math.max(0, gameState.gold + value);
+                displayStateChange("gold", "You", value, reason);
+                break;
+        }
+        
+        updateStats();
+      }
+
+      // Add combat animations
+      function playAttackAnimation() {
+        const mainHand = document.getElementById("mainHand-slot");
+        mainHand.classList.add("attack-animation");
+        setTimeout(() => {
+          mainHand.classList.remove("attack-animation");
+        }, 500);
+      }
+
+      // Add these dice rolling functions
+      function rollDice(sides) {
+        const roll = Math.floor(Math.random() * sides) + 1;
+        const isCritical = sides === 20 && (roll === 20 || roll === 1);
+        const rollType = isCritical ? (roll === 20 ? 'critical-success' : 'critical-fail') : '';
+        
+        addDiceRoll(roll, sides, rollType);
+        return roll;
+      }
+
+      function addDiceRoll(result, sides, rollType = '', reason = '') {
+        const diceHistory = document.getElementById("diceHistory");
+        const rollElement = document.createElement('div');
+        rollElement.className = `dice-roll ${rollType}`;
+        rollElement.innerHTML = `
+            <span>${reason ? reason : `D${sides}`}</span>
+            <span class="dice-result">${result}</span>
+        `;
+        
+        diceHistory.insertBefore(rollElement, diceHistory.firstChild);
+        
+        // Keep only last 10 rolls
+        while (diceHistory.children.length > 10) {
+            diceHistory.removeChild(diceHistory.lastChild);
+        }
+      }
+
+      // Helper function to determine default slot for an item
+      function getDefaultSlot(item) {
+        if (!item) return "mainHand";
+        
+        switch(item.type) {
+            case "weapon":
+                return "mainHand";
+            case "armor":
+                return getArmorSlot(item.name);
+            case "accessory":
+                return getAccessorySlot();
+            default:
+                return "mainHand";
+        }
+      }
+
+      // Add a function to display state changes in the chat
+      function displayStateChange(type, target, amount, reason = "") {
+        let message = "";
+        let icon = "";
+        
+        switch(type) {
+            case "damage":
+                icon = "💥";
+                message = `${icon} ${target} takes ${amount} damage`;
+                break;
+            case "heal":
+                icon = "💚";
+                message = `${icon} ${target} heals for ${amount} health`;
+                break;
+            case "exp":
+                icon = "✨";
+                message = `${icon} You gain ${amount} experience`;
+                break;
+            case "gold":
+                icon = "🪙";
+                message = `${icon} You ${amount >= 0 ? 'gain' : 'lose'} ${Math.abs(amount)} gold`;
+                break;
+            case "mana":
+                icon = "🔮";
+                message = `${icon} ${amount >= 0 ? '+' : ''}${amount} mana`;
+                break;
+            case "item":
+                icon = "🎒";
+                message = `${icon} ${amount >= 0 ? 'Gained' : 'Lost'} item: ${target}`;
+                break;
+            case "equip":
+                icon = "⚔️";
+                message = `${icon} Equipped ${target} to ${reason}`;
+                break;
+            case "unequip":
+                icon = "🛡️";
+                message = `${icon} Unequipped ${target} from ${reason}`;
+                break;
+            case "skill":
+                icon = "📈";
+                message = `${icon} ${target} increased to level ${amount}`;
+                break;
+        }
+        
+        if (reason && type !== "equip" && type !== "unequip") {
+            message += ` (${reason})`;
+        }
+        
+        displayMessage("state", message);
+      }
+
+      // Start the game
+      initGame();
+    </script>
+  </body>
+</html>
