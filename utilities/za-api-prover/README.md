@@ -1,8 +1,17 @@
 # Za API Prover (ZAP) - SLOP Validator 🚀
 
-Za API Prover (ZAP) is a tool to validate SLOP (Simple Language Open Protocol) implementations. It tests whether a SLOP server correctly responds to expected requests, ensuring compliance with the protocol.
+## 🌟 Overview
 
-## Features
+ZAP is a programmatic API status checker designed to validate SLOP server implementations. It automatically tests each required endpoint against protocol specifications, providing a straightforward way to:
+
+- Verify your SLOP server is functioning correctly
+- Confirm API responses match expected formats 
+- Identify compliance issues with the SLOP protocol
+- Monitor API health with structured reporting
+
+The validator works by making real HTTP requests to your SLOP server and analyzing the responses, eliminating manual testing and ensuring consistent validation across implementations.
+
+## 🌟 Features
 
 ✅ Validates core SLOP endpoints:
 
