@@ -29,7 +29,7 @@ const IGNORED_ITEMS = [
 ];
 
 // file extensions to ignore
-const FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.ico', '.tiff', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.md', '.csv', '.json', '.xml', '.yaml', '.yml', '.jsonl', '.jsonl.gz', '.jsonl.bz2', '.jsonl.zip', '.jsonl.tar', '.jsonl.tar.gz', '.jsonl.tar.bz2', '.jsonl.tar.zip', '.jsonl.tar.tar'];
+const FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.ico', '.tiff', '.pdf', '.jsonl.gz', '.jsonl.bz2', '.jsonl.zip', '.jsonl.tar', '.jsonl.tar.gz', '.jsonl.tar.bz2', '.jsonl.tar.zip', '.jsonl.tar.tar'];
 
 // Function to check if a file is an image based on extension
 function isImageFile(filePath) {
