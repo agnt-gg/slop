@@ -35,6 +35,7 @@ That's it. Just a pattern. ✨
 - `POST /tools` // Use tools
 - `POST /memory` // Remember stuff
 - `GET /resources` // Get knowledge/files/data
+- `POST /resources` // Store knowledge/files/data
 - `POST /pay` // Handle money
 
 ## 3. CONNECTION TYPES
@@ -115,6 +116,10 @@ That's it. Just a pattern. ✨
 - `GET /resources` - List available resources
 - `GET /resources/:id` - Get a specific resource
 - `GET /resources/search?q=query` - Search resources
+- `POST /resources` - Create a new resource
+- `PUT /resources/:id` - Update an existing resource
+- `DELETE /resources/:id` - Delete a resource
+- `GET /resources/prefix/:prefix` - List resources with a specific prefix
 
 ### 💳 PAY
 - `POST /pay` - Create a payment
@@ -579,6 +584,109 @@ GET /resources/mars-101
 }
 ```
 
+#### POST /resources
+```json
+// REQUEST
+POST /resources
+{
+  "id": "notes/hello",
+  "title": "Hello Notes",
+  "type": "note",
+  "content": "This is a new resource",
+  "metadata": {
+    "created_by": "user_123",
+    "tags": ["notes", "hello"]
+  }
+}
+
+// RESPONSE
+{
+  "status": "created",
+  "resource": {
+    "id": "notes/hello",
+    "title": "Hello Notes",
+    "type": "note",
+    "content": "This is a new resource",
+    "metadata": {
+      "created_by": "user_123",
+      "tags": ["notes", "hello"],
+      "created_at": "2023-06-15T10:30:00Z"
+    }
+  }
+}
+```
+
+#### PUT /resources/:id
+```json
+// REQUEST
+PUT /resources/notes/hello
+{
+  "title": "Updated Hello Notes",
+  "content": "This content has been updated",
+  "metadata": {
+    "tags": ["notes", "hello", "updated"]
+  }
+}
+
+// RESPONSE
+{
+  "status": "updated",
+  "resource": {
+    "id": "notes/hello",
+    "title": "Updated Hello Notes",
+    "type": "note",
+    "content": "This content has been updated",
+    "metadata": {
+      "created_by": "user_123",
+      "tags": ["notes", "hello", "updated"],
+      "created_at": "2023-06-15T10:30:00Z",
+      "updated_at": "2023-06-15T11:45:00Z"
+    }
+  }
+}
+```
+
+#### DELETE /resources/:id
+```json
+// REQUEST
+DELETE /resources/notes/hello
+
+// RESPONSE
+{
+  "status": "deleted",
+  "id": "notes/hello"
+}
+```
+
+#### GET /resources/prefix/:prefix
+```json
+// REQUEST
+GET /resources/prefix/notes
+
+// RESPONSE
+{
+  "resources": [
+    {
+      "id": "notes/hello",
+      "title": "Hello Notes",
+      "type": "note"
+    },
+    {
+      "id": "notes/todo",
+      "title": "To-Do List",
+      "type": "note"
+    }
+  ]
+}
+```
+
+> **Note on Hierarchical Resource IDs**: SLOP supports hierarchical resource IDs using path segments (e.g., `notes/hello`). When using hierarchical IDs:
+> 
+> 1. The full path is treated as a single ID when using `GET`, `PUT`, or `DELETE` operations on `/resources/:id`
+> 2. Use the `/resources/prefix/:prefix` endpoint to retrieve all resources under a specific prefix
+> 3. Hierarchical IDs enable organizing resources in a folder-like structure
+> 4. The hierarchy is purely logical - implementations may store resources however they prefer
+
 #### GET /resources/search
 ```json
 // REQUEST
@@ -978,6 +1086,156 @@ socket.onclose = function(event) {
 - Ideal for chat applications and interactive AI assistants
 
 Remember: Use `/ws` suffix to indicate WebSocket endpoints in your SLOP implementation! 🔌
+
+---
+
+## 🔄 RESOURCE MANAGEMENT IMPLEMENTATION EXAMPLE
+
+Here's a simple JavaScript implementation of the resource management endpoints:
+
+```javascript
+// In-memory resource store
+const resources = {};
+
+// GET /resources - List all resources
+app.get('/resources', (req, res) => {
+  res.json({ resources: Object.values(resources) });
+});
+
+// GET /resources/:id - Get a specific resource
+app.get('/resources/:id', (req, res) => {
+  const resourceId = req.params.id;
+  
+  if (!resources[resourceId]) {
+    return res.status(404).json({ error: 'Resource not found' });
+  }
+  
+  res.json(resources[resourceId]);
+});
+
+// POST /resources - Create a new resource
+app.post('/resources', (req, res) => {
+  const { id, title, content, type, metadata = {} } = req.body;
+  
+  if (!id || !title) {
+    return res.status(400).json({ error: 'Resource ID and title are required' });
+  }
+  
+  if (resources[id]) {
+    return res.status(409).json({ error: 'Resource with this ID already exists' });
+  }
+  
+  const now = new Date().toISOString();
+  
+  const resource = {
+    id,
+    title,
+    type: type || 'document',
+    content: content || '',
+    metadata: {
+      ...metadata,
+      created_at: now
+    }
+  };
+  
+  resources[id] = resource;
+  
+  res.status(201).json({
+    status: 'created',
+    resource
+  });
+});
+
+// PUT /resources/:id - Update an existing resource
+app.put('/resources/:id', (req, res) => {
+  const resourceId = req.params.id;
+  const { title, content, type, metadata = {} } = req.body;
+  
+  if (!resources[resourceId]) {
+    return res.status(404).json({ error: 'Resource not found' });
+  }
+  
+  const now = new Date().toISOString();
+  const existingResource = resources[resourceId];
+  
+  const updatedResource = {
+    ...existingResource,
+    title: title || existingResource.title,
+    content: content !== undefined ? content : existingResource.content,
+    type: type || existingResource.type,
+    metadata: {
+      ...existingResource.metadata,
+      ...metadata,
+      updated_at: now
+    }
+  };
+  
+  resources[resourceId] = updatedResource;
+  
+  res.json({
+    status: 'updated',
+    resource: updatedResource
+  });
+});
+
+// DELETE /resources/:id - Delete a resource
+app.delete('/resources/:id', (req, res) => {
+  const resourceId = req.params.id;
+  
+  if (!resources[resourceId]) {
+    return res.status(404).json({ error: 'Resource not found' });
+  }
+  
+  delete resources[resourceId];
+  
+  res.json({
+    status: 'deleted',
+    id: resourceId
+  });
+});
+
+// GET /resources/prefix/:prefix - List resources with a specific prefix
+app.get('/resources/prefix/:prefix', (req, res) => {
+  const prefix = req.params.prefix;
+  
+  const matchingResources = Object.values(resources).filter(resource => 
+    resource.id.startsWith(prefix + '/')
+  );
+  
+  res.json({ resources: matchingResources });
+});
+
+// GET /resources/search - Search resources
+app.get('/resources/search', (req, res) => {
+  const query = req.query.q?.toLowerCase() || '';
+  
+  if (!query) {
+    return res.status(400).json({ error: 'Search query is required' });
+  }
+  
+  const results = Object.values(resources)
+    .filter(resource => 
+      resource.title.toLowerCase().includes(query) || 
+      (resource.content && resource.content.toLowerCase().includes(query))
+    )
+    .map(resource => ({
+      id: resource.id,
+      title: resource.title,
+      type: resource.type,
+      score: 0.9 // In a real implementation, you would calculate a relevance score
+    }));
+  
+  res.json({ results });
+});
+```
+
+This implementation provides:
+- Full CRUD operations for resources
+- Support for hierarchical resource IDs
+- Prefix-based resource listing
+- Simple text search functionality
+
+For production use, you would replace the in-memory store with a database and add proper authentication and error handling.
 
 ---
 
