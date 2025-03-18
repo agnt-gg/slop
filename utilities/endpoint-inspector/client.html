@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOP Inspector</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: 0 auto; background: #f5f5f5; }
+        h1 { color: #333; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #urlInput { width: 70%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 12px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #45a049; }
+        #result { margin-top: 20px; }
+        .success { color: #2e7d32; }
+        .error { color: #d32f2f; }
+        .endpoint { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #fff; }
+        .endpoint:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .method { font-weight: bold; margin-right: 5px; padding: 4px 8px; border-radius: 4px; }
+        .GET { background-color: #4CAF50; color: white; }
+        .POST { background-color: #2196F3; color: white; }
+        .PUT { background-color: #FF9800; color: white; }
+        .DELETE { background-color: #F44336; color: white; }
+        .standard { border-left: 4px solid #4CAF50; }
+        .non-standard { border-left: 4px solid #FFA726; }
+        .documented { border-top: 4px solid #2196F3; }
+        details { margin-top: 10px; }
+        summary { cursor: pointer; padding: 8px; background: #f8f8f8; border-radius: 4px; }
+        pre { background-color: #f5f5f5; padding: 15px; overflow: auto; max-height: 300px; border-radius: 4px; }
+        .hint { color: #666; font-style: italic; font-size: 0.9em; }
+        .copy-btn { background: #eee; border: none; padding: 4px 8px; cursor: pointer; margin-left: 5px; border-radius: 4px; }
+        .copy-btn:hover { background: #ddd; }
+        .auth-required { color: #f57c00; margin-left: 10px; }
+        .test-btn { background: #90caf9; color: black; padding: 4px 8px; border-radius: 4px; text-decoration: none; margin-right: 5px; }
+        .test-btn:hover { background: #64b5f6; }
+        .filters { margin: 15px 0; padding: 10px; background: #fff; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SLOP Inspector</h1>
+        <p>Enter the URL of a SLOP-compatible API to discover its structure</p>
+        <div style="display: flex; margin-bottom: 10px; gap: 10px;">
+            <input type="text" id="urlInput" placeholder="Enter SLOP API URL (e.g., https://agnt.replit.app/)">
+            <button onclick="crawl()">Inspect</button>
+        </div>
+        <div class="filters">
+            <label><input type="checkbox" id="showAllEndpoints" onchange="displayFilteredResults()"> Show all endpoints (including unconfirmed)</label>
+            <label style="margin-left: 20px;"><input type="checkbox" id="showOnlyStandard" onchange="displayFilteredResults()"> Show only standard endpoints</label>
+            <label style="margin-left: 20px;"><input type="checkbox" id="showOnlyDocumented" onchange="displayFilteredResults()"> Show only documented endpoints</label>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function crawl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = '<h3>Crawling... Please wait, this may take a minute.</h3>';
+
+            try {
+                const response = await fetch(`/crawl?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                let resultHTML = `<h2 class="${data.success ? 'success' : 'error'}">${data.message}</h2>`;
+                resultHTML += `<p>Crawled URL: <a href="${data.crawledUrl}" target="_blank">${data.crawledUrl}</a> <button class="copy-btn" onclick="copyToClipboard('${data.crawledUrl}')">Copy</button></p>`;
+                
+                if (data.success) {
+                    // Show API metadata if available
+                    if (data.data._info) {
+                        const info = data.data._info;
+                        resultHTML += `
+                            <div style="background: #e8f5e9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                                <h3>${info.name || 'SLOP API'} ${info.version ? `v${info.version}` : ''}</h3>
+                                ${info.description ? `<p>${info.description}</p>` : ''}
+                                ${info.scope ? `<p><strong>Scope:</strong> ${info.scope}</p>` : ''}
+                                ${info.url ? `<p><strong>Base URL:</strong> ${info.url}</p>` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    resultHTML += '<h3>SLOP API Structure:</h3>';
+                    
+                    // Store data for filtering
+                    window.apiData = data.data;
+                    
+                    // Display the results
+                    displayFilteredResults();
+                    return;
+                } else {
+                    resultHTML += `<p class="error">Error: ${data.error}</p>`;
+                }
+                
+                resultElement.innerHTML = resultHTML;
+            } catch (error) {
+                resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayFilteredResults() {
+            if (!window.apiData) return;
+            
+            const showAll = document.getElementById('showAllEndpoints').checked;
+            const showOnlyStandard = document.getElementById('showOnlyStandard').checked;
+            const showOnlyDocumented = document.getElementById('showOnlyDocumented').checked;
+            
+            // Organize endpoints by category
+            const categories = {
+                'chat': [],
+                'tools': [],
+                'memory': [],
+                'resources': [],
+                'pay': [],
+                'other': []
+            };
+            
+            // Sort and filter endpoints
+            Object.entries(window.apiData)
+                .filter(([endpoint, details]) => {
+                    // Skip metadata
+                    if (endpoint === '_info') return false;
+                    
+                    // Filter by detection status
+                    if (!showAll && details.methods.length === 0) return false;
+                    
+                    // Filter by standard status
+                    if (showOnlyStandard && !details.isStandard) return false;
+                    
+                    // Filter by documentation status
+                    if (showOnlyDocumented && !details.fromInfoEndpoint) return false;
+                    
+                    return true;
+                })
+                .sort((a, b) => {
+                    const aCategory = getCategoryFromEndpoint(a[0]);
+                    const bCategory = getCategoryFromEndpoint(b[0]);
+                    if (aCategory !== bCategory) {
+                        const order = ['chat', 'tools', 'memory', 'resources', 'pay', 'other'];
+                        return order.indexOf(aCategory) - order.indexOf(bCategory);
+                    }
+                    return a[0].length - b[0].length;
+                })
+                .forEach(([endpoint, details]) => {
+                    const category = getCategoryFromEndpoint(endpoint);
+                    categories[category].push([endpoint, details]);
+                });
+            
+            // Generate HTML
+            let resultHTML = '';
+            for (const [category, endpoints] of Object.entries(categories)) {
+                if (endpoints.length === 0) continue;
+                
+                resultHTML += `<h4>${category.toUpperCase()} ENDPOINTS</h4>`;
+                for (const [endpoint, details] of endpoints) {
+                    resultHTML += formatEndpoint(endpoint, details);
+                }
+            }
+            
+            // Update the display
+            const resultElement = document.getElementById('result');
+            const headerEnd = resultElement.innerHTML.indexOf('<h3>SLOP API Structure:</h3>') + '<h3>SLOP API Structure:</h3>'.length;
+            resultElement.innerHTML = resultElement.innerHTML.substring(0, headerEnd) + resultHTML;
+        }
+
+        function getCategoryFromEndpoint(endpoint) {
+            if (endpoint.startsWith('/chat')) return 'chat';
+            if (endpoint.startsWith('/tools')) return 'tools';
+            if (endpoint.startsWith('/memory')) return 'memory';
+            if (endpoint.startsWith('/resources')) return 'resources';
+            if (endpoint.startsWith('/pay')) return 'pay';
+            return 'other';
+        }
+
+        function formatEndpoint(endpoint, details) {
+            const isStandard = details.isStandard || details.standardMethod;
+            const isDocumented = details.fromInfoEndpoint;
+            
+            let html = `<div class="endpoint ${isStandard ? 'standard' : 'non-standard'} ${isDocumented ? 'documented' : ''}">`;
+            html += `<h4>${endpoint} <button class="copy-btn" onclick="copyToClipboard('${endpoint}')">Copy</button></h4>`;
+            
+            // Display endpoint description if available
+            if (details.description) {
+                html += `<p><em>${details.description}</em></p>`;
+            }
+            
+            // Display methods with color coding
+            if (details.methods && details.methods.length > 0) {
+                html += `<p>Methods: ${details.methods.map(m => `<span class="method ${m}">${m}</span>`).join(' ')}`;
+                if (details.requiresAuth) {
+                    html += `<span class="auth-required">🔒 Requires Authentication</span>`;
+                }
+                html += `</p>`;
+            } else {
+                html += `<p>Methods: <span class="hint">None detected - endpoint may require specific parameters or authentication</span></p>`;
+            }
+            
+            // Show standard compliance status
+            if (isStandard) {
+                html += `<p class="success">✓ Standard SLOP Endpoint</p>`;
+            }
+            
+            // If documented via info endpoint, show request and response formats
+            if (isDocumented) {
+                html += `<div style="margin-top: 10px;">
+                    <span class="hint">📚 Documented via /info endpoint</span>`;
+                
+                if (details.request_format) {
+                    html += `
+                        <details>
+                            <summary>Request Format</summary>
+                            <pre>${JSON.stringify(details.request_format, null, 2)}</pre>
+                        </details>`;
+                }
+                
+                if (details.response_format) {
+                    html += `
+                        <details>
+                            <summary>Response Format</summary>
+                            <pre>${JSON.stringify(details.response_format, null, 2)}</pre>
+                        </details>`;
+                }
+                
+                html += `</div>`;
+            }
+            
+            // Display data if available
+            if (details.data) {
+                html += `<details>
+                    <summary>Response Data</summary>
+                    <pre>${JSON.stringify(details.data, null, 2)}</pre>
+                </details>`;
+            }
+            
+            // Display API test links using proxy
+            const baseUrl = document.getElementById('urlInput').value;
+            if (baseUrl && !endpoint.includes(':')) {
+                const proxyUrl = `/proxy/${baseUrl}${endpoint}`;
+                html += `<div class="hint">
+                    Test via Proxy: 
+                    <a href="#" class="test-btn" onclick="testEndpoint('${proxyUrl}', 'GET'); return false;">GET</a>`;
+                if (details.methods.includes('POST')) {
+                    html += `<a href="#" class="test-btn" onclick="testEndpoint('${proxyUrl}', 'POST'); return false;">POST</a>`;
+                }
+                html += `</div>`;
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show a temporary success message
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = originalText, 1000);
+            });
+        }
+        
+        // Simple function to test endpoints
+        function testEndpoint(url, method) {
+            if (method === 'GET') {
+                // For GET requests, just open the URL directly
+                window.open(url, '_blank');
+            } else if (method === 'POST') {
+                // For POST, open a simpler test page
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write('<!DOCTYPE html><html><head><title>Testing ' + method + ' ' + url + '</title>' +
+                    '<style>body{font-family:Arial,sans-serif;padding:20px}textarea{width:100%;height:200px}</style></head>' +
+                    '<body><h2>Testing ' + method + ' ' + url + '</h2>' +
+                    '<form method="post" action="' + url + '" target="_blank">' +
+                    '<h3>Request Body (JSON):</h3>' +
+                    '<textarea name="json">{}</textarea>' +
+                    '<p>Note: You may need to manually set Content-Type header to application/json</p>' +
+                    '<input type="submit" value="Send ' + method + ' Request">' +
+                    '</form></body></html>');
+                newWindow.document.close();
+            }
+        }
+    </script>
+</body>
+</html>

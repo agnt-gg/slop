@@ -87,6 +87,47 @@ That's it. Just a pattern. ✨
 - Any tool
 - Any platform
 
+
+---
+
+## ⚡ Quick Start
+
+Get started with the SLOP repo of tools in minutes:
+
+```bash
+# Clone the repository
+git clone https://github.com/agnt-gg/slop
+cd slop
+
+# Check out the examples
+cd examples/javascript
+
+# Install dependencies
+npm install
+
+# Start the server
+npm start
+
+# Your SLOP server is now running at http://localhost:3000
+# Try a simple SLOP request:
+curl -X POST http://localhost:3000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Hello SLOP!"}]}'
+```
+
+Or test any SLOP API with our endpoint inspector:
+```bash
+# Go to the endpoint inspector utility
+cd slop/utilities/slop-inspector/server
+
+# Install and run
+npm install
+npm start
+
+# Open http://localhost:4000 in your browser
+# Enter any SLOP API URL to inspect it
+```
+
 ---
 
 ## 📖 ENDPOINT OPERATIONS (v0.0.1)
