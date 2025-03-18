@@ -3,7 +3,7 @@
 > **Because AI shouldn't be complicated**
 
 ### 🎯 WHAT SLOP IS:
-- A pattern for AI APIs with 5 basic endpoints
+- A pattern for AI APIs with 6 basic endpoints
 - Regular HTTP(S) requests with JSON data
 - A standard way to talk to any AI service
 - Based on REST: GET and POST what you need
@@ -30,13 +30,24 @@ That's it. Just a pattern. ✨
 - Every AI is accessible
 - Every developer is welcome
 
-## 2. MINIMUM VIABLE ENDPOINTS
-- `POST /chat` // Talk to AI
-- `POST /tools` // Use tools
-- `POST /memory` // Remember stuff
-- `GET /resources` // Get knowledge/files/data
-- `POST /resources` // Store knowledge/files/data
-- `POST /pay` // Handle money
+## 2. CORE ENDPOINTS (ALL OPTIONAL)
+
+SLOP is modular - implement only what you need. A server is SLOP-compliant if it implements *any one* of these endpoints following the standard format.
+
+| Endpoint | Method | Purpose | Implementation |
+|----------|--------|---------|----------------|
+| `/chat`  | POST   | Talk to AI | Optional |
+| `/tools` | GET, POST | Use AI tools | Optional |
+| `/memory` | GET, POST, PUT, DELETE | Store and retrieve data | Optional |
+| `/resources` | GET, POST | Access knowledge and files | Optional |
+| `/pay` | POST | Handle payments | Optional |
+| `/info` | GET | Expose server metadata | Optional |
+
+> 💡 **Note:** You don't need to implement all endpoints - just the ones your application requires. 
+> Even a single endpoint following SLOP conventions makes your service SLOP-compliant.
+
+> 🔍 **Pro Tip:** Implementing the `/info` endpoint is highly recommended as it allows your SLOP server to self-document its capabilities. 
+> This makes it much easier for others to discover and integrate with your service without needing external documentation.
 
 ## 3. CONNECTION TYPES
 - Standard HTTP/REST Interface For Most Things
@@ -165,6 +176,9 @@ npm start
 ### 💳 PAY
 - `POST /pay` - Create a payment
 - `GET /pay/:id` - Get payment status
+
+### ℹ️ INFO
+- `GET /info` - Get server metadata, capabilities, and documentation
 
 ---
 
@@ -790,6 +804,48 @@ GET /pay/tx_987654
 }
 ```
 
+
+### ℹ️ INFO ENDPOINT
+
+#### GET /info
+```json
+// REQUEST
+GET /info
+
+// RESPONSE
+{
+  "name": "Example SLOP Server",
+  "version": "1.0.0",
+  "description": "A SLOP-compliant AI assistant API",
+  "endpoints": [
+    {
+      "path": "/chat",
+      "methods": ["GET", "POST"],
+      "description": "Chat with the AI assistant"
+    },
+    {
+      "path": "/tools",
+      "methods": ["GET"],
+      "description": "List available tools"
+    }
+  ],
+  "creator": {
+    "name": "SLOP Community",
+    "website": "https://slop.ai",
+    "email": "hello@slop.ai"
+  },
+  "links": {
+    "documentation": "https://slop.ai/docs",
+    "github": "https://github.com/agnt-gg/slop"
+  },
+  "capabilities": {
+    "streaming": true,
+    "websockets": true,
+    "models": ["default-model"]
+  }
+}
+```
+
 ### 🔐 AUTH EXAMPLES
 
 Authentication in SLOP uses standard HTTP headers. Here are examples in both JavaScript and Python:
@@ -1239,8 +1295,9 @@ app.delete('/resources/:id', (req, res) => {
 app.get('/resources/prefix/:prefix', (req, res) => {
   const prefix = req.params.prefix;
   
-  const matchingResources = Object.values(resources).filter(resource => 
-    resource.id.startsWith(prefix + '/')
+  const matchingResources = Object.values(resources)
+    .filter(resource => 
+      resource.id.startsWith(prefix + '/')
   );
   
   res.json({ resources: matchingResources });

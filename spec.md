@@ -5,7 +5,7 @@ Date: 2025-03-08
 
 ## Abstract
 
-This document specifies the Simple Language Open Protocol (SLOP), a minimal HTTP-based protocol for AI agent interoperability. There are exactly five core endpoints with standard request/response formats. Nothing more. The spec is intentionally minimal to maximize adoption and implementation speed while ensuring interoperability.
+This document specifies the Simple Language Open Protocol (SLOP), a minimal HTTP-based protocol for AI agent interoperability. There are exactly six core endpoints with standard request/response formats. Nothing more. The spec is intentionally minimal to maximize adoption and implementation speed while ensuring interoperability.
 
 ## 1. Introduction
 
@@ -35,16 +35,37 @@ Three principles:
 
 You are SLOP-compliant if you:
 
-1. Implement ANY ONE of the five core endpoints
-2. Follow the JSON formats exactly as shown in examples
+1. Implement ANY ONE of the six core endpoints
+2. Follow the general JSON formats as shown in examples
 3. Return error responses as specified
 4. Use standard HTTP status codes correctly
+5. Provide an `/info` endpoint that describes your implemented endpoints
 
-That's it. No hidden requirements.
+That's it. No hidden requirements. Just broad recommendations.
+
+### 3.1 Endpoint Implementation Table
+
+| Endpoint | Required? | Core Function |
+|----------|-----------|--------------|
+| `/chat`  | Optional  | Text-based message exchange |
+| `/tools` | Optional  | Function discovery and execution |
+| `/memory` | Optional | Key-value data persistence |
+| `/resources` | Optional | Content and file management |
+| `/pay` | Optional | Payment processing |
+| `/info` | Optional | API self-documentation |
+
+### 3.2 Implementation Notes
+
+- Each endpoint is completely optional - implement only what your service needs
+- The `/info` endpoint is valuable for discovery but not required
+- When implementing a subset of endpoints, including the `/info` endpoint helps clients understand your service's capabilities
+- A SLOP-compliant server can be as minimal as implementing just one endpoint correctly
+
+Remember that SLOP's design principle is "Zero-Cost When Unused" - there's no penalty for only implementing what you need.
 
 ## 4. Core Endpoints
 
-SLOP has exactly five endpoints. Implementation must match example request/response formats precisely for the endpoints you choose to implement.
+SLOP has exactly six endpoints. Implementation must match example request/response formats precisely for the endpoints you choose to implement.
 
 ### 4.1 Chat Endpoint
 
@@ -349,6 +370,51 @@ Content-Type: application/json
   "description": "API usage",
   "status": "success",
   "created_at": "2023-05-15T10:30:00Z"
+}
+```
+
+### 4.6 Info Endpoint
+
+#### 4.6.1 GET /info
+
+```
+REQUEST:
+GET /info
+
+RESPONSE:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "name": "Example SLOP Server",
+  "version": "1.0.0",
+  "description": "A SLOP-compliant AI assistant API",
+  "endpoints": [
+    {
+      "path": "/chat",
+      "methods": ["GET", "POST"],
+      "description": "Chat with the AI assistant"
+    },
+    {
+      "path": "/tools",
+      "methods": ["GET"],
+      "description": "List available tools"
+    }
+  ],
+  "creator": {
+    "name": "SLOP Community",
+    "website": "https://slop.ai",
+    "email": "hello@slop.ai"
+  },
+  "links": {
+    "documentation": "https://slop.ai/docs",
+    "github": "https://github.com/agnt-gg/slop"
+  },
+  "capabilities": {
+    "streaming": true,
+    "websockets": true,
+    "models": ["default-model"]
+  }
 }
 ```
 
