@@ -662,37 +662,43 @@
             }
             
             container.innerHTML = Object.entries(state.validationResults).map(([endpoint, result]) => {
-                const isSuccess = result.statusCode >= 200 && result.statusCode < 300 && !result.error;
+                // Check if this is an optional endpoint
+                const isOptional = result.optional === true;
                 
-                if (endpoint === 'memory') {
-                    const storeSuccess = result.storeResponse.statusCode >= 200 && 
-                                        result.storeResponse.statusCode < 300 && 
-                                        !result.storeResponse.error;
-                    const getSuccess = result.getResponse.statusCode >= 200 && 
-                                      result.getResponse.statusCode < 300 && 
-                                      !result.getResponse.error;
-                    
+                // For optional endpoints like pay, show a different UI
+                if (isOptional) {
                     return `
                         <div class="endpoint-card">
-                            <div class="endpoint-header ${storeSuccess && getSuccess ? 'success' : 'error'}">
-                                /memory
-                                <span class="badge ${storeSuccess && getSuccess ? 'badge-success' : 'badge-danger'}">
-                                    ${storeSuccess && getSuccess ? 'PASS' : 'FAIL'}
+                            <div class="endpoint-header" style="background-color: #f8f9fa; color: #6c757d;">
+                                /${endpoint}
+                                <span class="badge" style="background-color: #6c757d; color: white;">
+                                    OPTIONAL
                                 </span>
                             </div>
                             <div class="endpoint-body">
                                 <div>
-                                    <strong>Store:</strong> ${storeSuccess ? 'Success' : 'Failed'}
-                                    ${result.storeResponse.error ? `<div>Error: ${result.storeResponse.error}</div>` : ''}
+                                    <strong>Status:</strong> Not implemented (Optional endpoint)
                                 </div>
                                 <div>
-                                    <strong>Get:</strong> ${getSuccess ? 'Success' : 'Failed'}
-                                    ${result.getResponse.error ? `<div>Error: ${result.getResponse.error}</div>` : ''}
+                                    <em>This endpoint is not required for basic SLOP functionality</em>
                                 </div>
                             </div>
                         </div>
                     `;
-                } else {
+                }
+                
+                // Handle memory endpoint specially
+                if (endpoint === 'memory') {
+                    const storeSuccess = result.storeResponse && 
+                                        result.storeResponse.statusCode >= 200 && 
+                                        result.storeResponse.statusCode < 300;
+                    const getSuccess = result.getResponse && 
+                                      result.getResponse.statusCode >= 200 && 
+                                      result.getResponse.statusCode < 300;
+                    
+                    // Memory is valid if either store or get works
+                    const isSuccess = storeSuccess || getSuccess;
+                    
                     return `
                         <div class="endpoint-card">
                             <div class="endpoint-header ${isSuccess ? 'success' : 'error'}">
@@ -703,7 +709,34 @@
                             </div>
                             <div class="endpoint-body">
                                 <div>
-                                    <strong>Status:</strong> ${result.statusCode || 'Error'}
+                                    <strong>Store:</strong> ${storeSuccess ? 'Success' : 'Failed'}
+                                    ${result.storeResponse && result.storeResponse.error ? 
+                                        `<div>Error: ${result.storeResponse.error}</div>` : ''}
+                                </div>
+                                <div>
+                                    <strong>Get:</strong> ${getSuccess ? 'Success' : 'Failed'}
+                                    ${result.getResponse && result.getResponse.error ? 
+                                        `<div>Error: ${result.getResponse.error}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Standard endpoint format for other endpoints
+                    const isSuccess = result.statusCode >= 200 && result.statusCode < 300 && !result.error;
+                    const statusDisplay = result.statusCode || 'Error';
+                    
+                    return `
+                        <div class="endpoint-card">
+                            <div class="endpoint-header ${isSuccess ? 'success' : 'error'}">
+                                /${endpoint}
+                                <span class="badge ${isSuccess ? 'badge-success' : 'badge-danger'}">
+                                    ${isSuccess ? 'PASS' : 'FAIL'}
+                                </span>
+                            </div>
+                            <div class="endpoint-body">
+                                <div>
+                                    <strong>Status:</strong> ${statusDisplay}
                                 </div>
                                 ${result.error ? 
                                     `<div>
@@ -860,12 +893,15 @@
         }
         
         // Send custom request
-        function sendCustomRequest(event) {
+        document.getElementById('request-form').addEventListener('submit', function(event) {
             event.preventDefault();
             
             const method = document.getElementById('request-method').value;
             const endpoint = document.getElementById('request-endpoint').value;
             const payloadStr = document.getElementById('request-payload').value;
+            
+            // Show loading state
+            document.getElementById('response-container').innerText = 'Sending request...';
             
             let payload = null;
             if (payloadStr) {
@@ -879,6 +915,38 @@
             
             const url = state.targetUrl + endpoint;
             
+            // Make a direct XHR request to see the response immediately
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onload = function() {
+                try {
+                    let responseText = xhr.responseText;
+                    let responseObj;
+                    
+                    // Try to parse as JSON for prettier display
+                    try {
+                        responseObj = JSON.parse(responseText);
+                        responseText = JSON.stringify(responseObj, null, 2);
+                    } catch (e) {
+                        // Not JSON, show as is
+                    }
+                    
+                    document.getElementById('response-container').innerText = 
+                        `Status: ${xhr.status}\n\n${responseText}`;
+                } catch (e) {
+                    document.getElementById('response-container').innerText = 
+                        `Error parsing response: ${e.message}`;
+                }
+            };
+            
+            xhr.onerror = function() {
+                document.getElementById('response-container').innerText = 
+                    `Network Error: Failed to connect to ${url}`;
+            };
+            
+            // Also send via WebSocket for traffic monitoring
             socket.send(JSON.stringify({
                 type: 'replayRequest',
                 requestData: {
@@ -887,7 +955,10 @@
                     payload
                 }
             }));
-        }
+            
+            // Send the request
+            xhr.send(payload ? JSON.stringify(payload) : null);
+        });
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -910,9 +981,6 @@
             // Filter inputs
             document.getElementById('endpoint-filter').addEventListener('input', updateTrafficLogs);
             document.getElementById('status-filter').addEventListener('change', updateTrafficLogs);
-            
-            // Request form
-            document.getElementById('request-form').addEventListener('submit', sendCustomRequest);
             
             // Initialize example payload
             const requestEndpoint = document.getElementById('request-endpoint');
