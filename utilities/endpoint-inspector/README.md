@@ -4,6 +4,11 @@
 
 A tiny but powerful utility tool for inspecting, discovering, and testing SLOP (Simple Language Open Protocol) API endpoints with an intuitive interface.
 
+<div align="center">
+  <img src="https://github.com/agnt-gg/slop/blob/main/utilities/endpoint-inspector/SLOP-Endpoint-Inspector.PNG?raw=true" alt="SLOP Inspector" width="100%"/>
+  <p><em>The SLOP Endpoint Inspection Tool</em></p>
+</div>
+
 ## ✨ Overview
 
 The SLOP Endpoint Inspector is a developer's best friend when working with SLOP APIs:
