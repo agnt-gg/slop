@@ -53,7 +53,7 @@ Get up and running in seconds:
 
 1. Clone this repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/agnt-gg/slop
 cd endpoint-inspector
 ```
 
