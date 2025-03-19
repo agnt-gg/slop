@@ -8,8 +8,8 @@ const { join, extname } = path;
 const IGNORED_ITEMS = [
   'output.txt',
   'llms.txt',
-  'flatten.mjs',
-  'flatten.cjs',
+  'LIGMA.mjs',
+  'LIGMA.cjs',
   'node_modules',
   'database.txt',
   'lib',
