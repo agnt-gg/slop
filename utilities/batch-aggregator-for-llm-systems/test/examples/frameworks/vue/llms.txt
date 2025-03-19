@@ -1,0 +1,53 @@
+Directory Structure:
+- package.json
++ src
+  - App.vue
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "vue-example",
+  "version": "3.3.0",
+  "description": "Vue framework example for BALLS testing",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.0",
+    "vite": "^4.3.0"
+  }
+} 
+----------------------
+SRC/APP.VUE
+----------------------
+<template>
+  <div class="app">
+    <header class="app-header">
+      <h1>Vue Example</h1>
+      <p>Count: {{ count }}</p>
+      <button @click="increment">
+        Increment
+      </button>
+    </header>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+
+const increment = () => {
+  count.value++
+}
+</script>
+
+<style>...</style> 

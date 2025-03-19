@@ -1,0 +1,14 @@
+{
+  "name": "legacy-system",
+  "version": "1.0.0",
+  "description": "Legacy system example for BALLS testing",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "jquery": "^3.6.0",
+    "lodash": "^4.17.21"
+  }
+} 

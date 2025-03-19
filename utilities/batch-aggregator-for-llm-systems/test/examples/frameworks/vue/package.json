@@ -1,0 +1,18 @@
+{
+  "name": "vue-example",
+  "version": "3.3.0",
+  "description": "Vue framework example for BALLS testing",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.0",
+    "vite": "^4.3.0"
+  }
+} 

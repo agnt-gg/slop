@@ -1,0 +1,13 @@
+{
+  "name": "modern-system",
+  "version": "2.0.0",
+  "description": "Modern system example for BALLS testing",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.4.0"
+  }
+} 

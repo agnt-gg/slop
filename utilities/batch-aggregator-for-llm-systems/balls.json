@@ -1,0 +1,29 @@
+{
+    "repos": [
+        {
+            "path": "./test/examples/legacy/old-system",
+            "tag": "legacy",
+            "version": "1.0.0"
+        },
+        {
+            "path": "./test/examples/legacy/new-system",
+            "tag": "modern",
+            "version": "2.0.0"
+        },
+        {
+            "path": "./test/examples/frameworks/react",
+            "tag": "framework",
+            "version": "18.2.0"
+        },
+        {
+            "path": "./test/examples/frameworks/vue",
+            "tag": "framework",
+            "version": "3.3.0"
+        },
+        {
+            "path": "./test/examples/frameworks/svelte",
+            "tag": "framework",
+            "version": "4.2.0"
+        }
+    ]
+}

@@ -1,0 +1,308 @@
+
+---
+Repository: old-system
+---
+Directory Structure:
+- package.json
++ src
+  - index.js
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "legacy-system",
+  "version": "1.0.0",
+  "description": "Legacy system example for BALLS testing",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "jquery": "^3.6.0",
+    "lodash": "^4.17.21"
+  }
+} 
+----------------------
+SRC/INDEX.JS
+----------------------
+const express = require('express');
+const $ = require('jquery');
+const _ = require('lodash');
+
+const app = express();
+const port = 3000;
+
+// Legacy callback-based code
+app.get('/api/users', function(req, res) {
+  $.ajax({
+    url: 'https://api.example.com/users',
+    method: 'GET',
+    success: function(data) {
+      const processedData = _.map(data, function(user) {
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email
+        };
+      });
+      res.json(processedData);
+    },
+    error: function(err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+// Legacy route handling
+app.post('/api/users', function(req, res) {
+  const userData = req.body;
+  $.ajax({
+    url: 'https://api.example.com/users',
+    method: 'POST',
+    data: userData,
+    success: function(response) {
+      res.json(response);
+    },
+    error: function(err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+app.listen(port, function() {
+  console.log(`Legacy server running on port ${port}`);
+}); 
+
+
+---
+Repository: new-system
+---
+Directory Structure:
+- package.json
++ src
+  - index.js
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "modern-system",
+  "version": "2.0.0",
+  "description": "Modern system example for BALLS testing",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.4.0"
+  }
+} 
+----------------------
+SRC/INDEX.JS
+----------------------
+import express from 'express';
+import axios from 'axios';
+
+const app = express();
+const port = 3000;
+
+// Modern async/await code
+app.get('/api/users', async (req, res) => {
+  try {
+    const { data } = await axios.get('https://api.example.com/users');
+    const processedData = data.map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email
+    }));
+    res.json(processedData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Modern route handling with async/await
+app.post('/api/users', async (req, res) => {
+  try {
+    const { data } = await axios.post('https://api.example.com/users', req.body);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Modern server running on port ${port}`);
+}); 
+
+
+---
+Repository: react
+---
+Directory Structure:
+- package.json
++ src
+  - App.js
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "react-example",
+  "version": "18.2.0",
+  "description": "React framework example for BALLS testing",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "5.0.1"
+  }
+} 
+----------------------
+SRC/APP.JS
+----------------------
+import React, { useState } from 'react';
+import './App.css';
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>React Example</h1>
+        <p>Count: {count}</p>
+        <button onClick={() => setCount(count + 1)}>
+          Increment
+        </button>
+      </header>
+    </div>
+  );
+}
+
+export default App; 
+
+
+---
+Repository: vue
+---
+Directory Structure:
+- package.json
++ src
+  - App.vue
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "vue-example",
+  "version": "3.3.0",
+  "description": "Vue framework example for BALLS testing",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.0",
+    "vite": "^4.3.0"
+  }
+} 
+----------------------
+SRC/APP.VUE
+----------------------
+<template>
+  <div class="app">
+    <header class="app-header">
+      <h1>Vue Example</h1>
+      <p>Count: {{ count }}</p>
+      <button @click="increment">
+        Increment
+      </button>
+    </header>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+
+const increment = () => {
+  count.value++
+}
+</script>
+
+<style>...</style> 
+
+
+---
+Repository: svelte
+---
+Directory Structure:
+- package.json
++ src
+  - App.svelte
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "svelte-example",
+  "version": "4.2.0",
+  "description": "Svelte framework example for BALLS testing",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "svelte": "^4.2.0",
+    "svelte-routing": "^2.0.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.0",
+    "vite": "^4.3.0"
+  }
+} 
+----------------------
+SRC/APP.SVELTE
+----------------------
+<script>
+  let count = 0;
+
+  function increment() {
+    count += 1;
+  }
+</script>
+
+<div class="app">
+  <header class="app-header">
+    <h1>Svelte Example</h1>
+    <p>Count: {count}</p>
+    <button on:click={increment}>
+      Increment
+    </button>
+  </header>
+</div>
+
+<style>...</style> 
+

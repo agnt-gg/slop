@@ -1,0 +1,49 @@
+Directory Structure:
+- package.json
++ src
+  - App.js
+
+File Contents:
+----------------------
+PACKAGE.JSON
+----------------------
+{
+  "name": "react-example",
+  "version": "18.2.0",
+  "description": "React framework example for BALLS testing",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "5.0.1"
+  }
+} 
+----------------------
+SRC/APP.JS
+----------------------
+import React, { useState } from 'react';
+import './App.css';
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>React Example</h1>
+        <p>Count: {count}</p>
+        <button onClick={() => setCount(count + 1)}>
+          Increment
+        </button>
+      </header>
+    </div>
+  );
+}
+
+export default App; 

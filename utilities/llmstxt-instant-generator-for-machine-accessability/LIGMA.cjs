@@ -16,11 +16,9 @@ const IGNORED_ITEMS = [
   'img',
   'css',
   'api',
-  'src',
   'login',
   'account',
   'package-lock.json',
-  'package.json',
   '.gitignore',
   '.git',
   'typescript',
@@ -29,7 +27,7 @@ const IGNORED_ITEMS = [
 ];
 
 // file extensions to ignore
-const FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.ico', '.tiff', '.pdf', '.jsonl.gz', '.jsonl.bz2', '.jsonl.zip', '.jsonl.tar', '.jsonl.tar.gz', '.jsonl.tar.bz2', '.jsonl.tar.zip', '.jsonl.tar.tar'];
+const FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.ico', '.tiff', '.pdf'];
 
 // Function to check if a file is an image based on extension
 function isImageFile(filePath) {
@@ -39,7 +37,8 @@ function isImageFile(filePath) {
 
 // Function to process file content and replace certain sections with ellipsis
 function processFileContent(content, filePath) {
-
+  console.log(`Processing file: ${filePath}`);
+  
   // Replace content inside <style>...</style> tags with ellipsis
   content = content.replace(/<style>[\s\S]*?<\/style>/gi, '<style>...</style>');
   
@@ -72,15 +71,24 @@ function buildDirectoryOutline(srcDir, depth = 0) {
   const files = readdirSync(srcDir);
   const prefix = '  '.repeat(depth);
 
+  console.log(`Building outline for directory: ${srcDir}`);
+  console.log(`Files found: ${files.join(', ')}`);
+
   files.forEach((file) => {
-    if (IGNORED_ITEMS.includes(file)) return; // Ignore specific files and directories
+    if (IGNORED_ITEMS.includes(file)) {
+      console.log(`Ignoring: ${file}`);
+      return;
+    }
 
     const filePath = join(srcDir, file);
     const stats = statSync(filePath);
 
     if (stats.isFile()) {
       // Skip image files
-      if (isImageFile(filePath)) return;
+      if (isImageFile(filePath)) {
+        console.log(`Skipping image file: ${file}`);
+        return;
+      }
       result += `${prefix}- ${file}\n`;
     } else if (stats.isDirectory()) {
       result += `${prefix}+ ${file}\n`;
@@ -93,22 +101,35 @@ function buildDirectoryOutline(srcDir, depth = 0) {
 
 function processDirectory(srcDir, writeStream) {
   const files = readdirSync(srcDir);
+  console.log(`\nProcessing directory: ${srcDir}`);
+  console.log(`Files found: ${files.join(', ')}`);
 
   files.forEach((file) => {
-    if (IGNORED_ITEMS.includes(file)) return; // Ignore specific files and directories
+    if (IGNORED_ITEMS.includes(file)) {
+      console.log(`Ignoring: ${file}`);
+      return;
+    }
 
     const filePath = join(srcDir, file);
     const stats = statSync(filePath);
 
     if (stats.isFile()) {
       // Skip image files
-      if (isImageFile(filePath)) return;
-      const fileContent = readFileSync(filePath, 'utf-8');
-      // Process the file content before writing it
-      const processedContent = processFileContent(fileContent, filePath);
-      writeStream.write(
-        `----------------------\n${filePath.toUpperCase()}\n----------------------\n${processedContent}\n`
-      );
+      if (isImageFile(filePath)) {
+        console.log(`Skipping image file: ${file}`);
+        return;
+      }
+      try {
+        const fileContent = readFileSync(filePath, 'utf-8');
+        // Process the file content before writing it
+        const processedContent = processFileContent(fileContent, filePath);
+        writeStream.write(
+          `----------------------\n${filePath.toUpperCase()}\n----------------------\n${processedContent}\n`
+        );
+        console.log(`Successfully processed: ${file}`);
+      } catch (error) {
+        console.error(`Error processing file ${file}:`, error);
+      }
     } else if (stats.isDirectory()) {
       processDirectory(filePath, writeStream);
     }
@@ -116,6 +137,10 @@ function processDirectory(srcDir, writeStream) {
 }
 
 function combineFiles(srcDir, outputFile) {
+  console.log(`\nStarting LIGMA process...`);
+  console.log(`Source directory: ${srcDir}`);
+  console.log(`Output file: ${outputFile}`);
+
   // Create a writable stream so that we don't create one huge string in memory.
   const writeStream = createWriteStream(outputFile, { encoding: 'utf-8' });
   
@@ -126,7 +151,10 @@ function combineFiles(srcDir, outputFile) {
   
   writeStream.end();
   writeStream.on('finish', () => {
-    console.log('All files combined successfully into:', outputFile);
+    console.log('\n✅ All files combined successfully into:', outputFile);
+  });
+  writeStream.on('error', (error) => {
+    console.error('\n❌ Error writing to output file:', error);
   });
 }
 
