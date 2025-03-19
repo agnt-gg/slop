@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOP - Join the Revolution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            background: #111111;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0,255,0,0.5);
+        }
+
+        h1::before {
+            content: "// ";
+            color: #008800;
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            color: #00cc00;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .waitlist-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input[type="email"] {
+            flex: 1;
+            padding: 12px 20px;
+            background: #000000;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            color: #00ff00;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s;
+        }
+
+        input[type="email"]:focus {
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+        }
+
+        input[type="email"]::placeholder {
+            color: #006600;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #000000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #003300;
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+        }
+
+        .leaderboard {
+            margin-top: 2em;
+            background: #111;
+            padding: 1em;
+            border-radius: 8px;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5em;
+            border-bottom: 1px solid #222;
+        }
+        .score {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        .share-message {
+            margin-top: 1em;
+            color: #00ff00;
+            font-size: 1.2em;
+        }
+        .logout-btn {
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+        }
+        #shareLink {
+            width: calc(100% - 26px);
+            padding: 12px;
+            margin: 10px 0;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #00ff00;
+            font-family: 'Fira Code', monospace;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: inset 0 0 5px rgba(0,255,0,0.2);
+        }
+        .share-container {
+            display: flex;
+            flex-direction: column;
+            margin: 15px 0;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 1px dashed #00ff00;
+            border-radius: 4px;
+            position: relative;
+        }
+        .copy-message {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #004400;
+            color: #00ff00;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .slop-manifesto {
+            margin: 2em 0;
+            text-align: left;
+            background: #0a0a0a;
+            padding: 1.5em;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .slop-manifesto h2 {
+            color: #00ff00;
+            margin-top: 0;
+        }
+        .slop-manifesto h3 {
+            color: #00cc00;
+            margin-top: 1.2em;
+            margin-bottom: 0.5em;
+            border-bottom: 1px solid #004400;
+            padding-bottom: 0.2em;
+        }
+        .slop-manifesto ul {
+            list-style-type: none;
+            padding-left: 1em;
+        }
+        .slop-manifesto li {
+            margin: 0.5em 0;
+        }
+        #joinForm {
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SLOP</h1>
+        <div class="tagline">Join the AI API Revolution</div>
+        
+        <div style="margin-bottom: 20px;">
+            <a href="https://github.com/agnt-gg/slop" target="_blank" style="color: #00ff00; margin: 0 10px; text-decoration: none;">GitHub</a>
+            <span style="color: #00ff00;">|</span>
+            <a href="https://discord.com/invite/nwXJMnHmXP" target="_blank" style="color: #00ff00; margin: 0 10px; text-decoration: none;">Discord</a>
+        </div>
+
+        <div id="leaderboard" class="leaderboard">
+            <h2>Top SLOPers</h2>
+            <div id="leaderboardList"></div>
+        </div>
+
+        <form id="joinForm" class="waitlist-form">
+            <input 
+                type="email" 
+                placeholder="enter_email@domain.com" 
+                required
+                id="emailInput"
+            >
+            <button type="submit">join_revolution()</button>
+        </form>
+
+        <div id="shareSection" style="display:none">
+            <div class="share-message">
+                Your Score: <span id="userScore">0</span>
+            </div>
+            
+            <div class="slop-manifesto">
+                <h2>SLOP: Because AI shouldn't be complicated</h2>
+                
+                <h3>1. CORE BELIEFS</h3>
+                <ul>
+                    <li>Everything is an HTTP request</li>
+                    <li>Every tool is an API endpoint</li>
+                    <li>Every AI is accessible</li>
+                    <li>Every developer is welcome</li>
+                </ul>
+                
+                <h3>2. MINIMUM VIABLE ENDPOINTS</h3>
+                <ul>
+                    <li>POST /chat      // Talk to AI</li>
+                    <li>POST /tools     // Use tools</li>
+                    <li>POST /memory    // Remember stuff</li>
+                    <li>GET /resources  // Get knowledge/files/data</li>
+                    <li>POST /pay       // Handle money (optional)</li>
+                </ul>
+                
+                <h3>3. CONNECTIONS</h3>
+                <ul>
+                    <li>WebSocket for real-time</li>
+                    <li>SSE for streaming</li>
+                    <li>HTTP for everything else</li>
+                </ul>
+                
+                <h2>THE SLOP PROMISE:</h2>
+                
+                <h3>1. OPEN</h3>
+                <ul>
+                    <li>Free to use</li>
+                    <li>Open source</li>
+                    <li>No vendor lock</li>
+                    <li>Community driven</li>
+                </ul>
+                
+                <h3>2. SIMPLE</h3>
+                <ul>
+                    <li>REST based</li>
+                    <li>JSON only</li>
+                    <li>Standard HTTP</li>
+                    <li>Zero dependencies</li>
+                </ul>
+                
+                <h3>3. FLEXIBLE</h3>
+                <ul>
+                    <li>Any AI model</li>
+                    <li>Any tool</li>
+                    <li>Any platform</li>
+                </ul>
+            </div>
+
+            <p>Share your link to earn points:</p>
+            <div class="share-container">
+                <input type="text" id="shareLink" readonly>
+                <button onclick="copyLink()">Copy Link</button>
+                <div class="copy-message" id="copyMessage">Copied!</div>
+            </div>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // These constants will be filled in by the server
+        const INITIAL_SCORE = INITIAL_SCORE_PLACEHOLDER;
+        const REFERRAL_BONUS = REFERRAL_BONUS_PLACEHOLDER;
+        const REFERRED_BONUS = REFERRED_BONUS_PLACEHOLDER;
+
+        const form = document.getElementById('joinForm');
+        const emailInput = document.getElementById('emailInput');
+        const shareSection = document.getElementById('shareSection');
+        const shareLinkInput = document.getElementById('shareLink');
+        const userScoreSpan = document.getElementById('userScore');
+
+        // Check for existing user on load
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            showUserDashboard(user);
+        }
+
+        function showUserDashboard(user) {
+            form.style.display = 'none';
+            shareSection.style.display = 'block';
+            shareLinkInput.value = window.location.origin + '?ref=' + user.referralCode;
+            userScoreSpan.textContent = user.score || INITIAL_SCORE;
+            updateLeaderboard();
+            
+            // Add click event to share link input
+            shareLinkInput.addEventListener('click', copyLink);
+        }
+
+        async function updateLeaderboard() {
+            try {
+                const response = await fetch('/leaderboard');
+                const leaders = await response.json();
+                const list = document.getElementById('leaderboardList');
+                list.innerHTML = leaders.map((user, i) => 
+                    '<div class="leaderboard-item">' +
+                    '<span>#' + (i + 1) + ' ' + user.username + '</span>' +
+                    '<span class="score">' + user.score + '</span>' +
+                    '</div>'
+                ).join('');
+            } catch (error) {
+                console.error('Leaderboard update failed:', error);
+            }
+        }
+
+        async function updateUserScore() {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                try {
+                    const response = await fetch(`/user/${user.email}`);
+                    const userData = await response.json();
+                    if (response.ok) {
+                        user.score = userData.score;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        userScoreSpan.textContent = userData.score;
+                    }
+                } catch (error) {
+                    console.error('Failed to update score:', error);
+                }
+            }
+        }
+
+        function copyLink() {
+            shareLinkInput.select();
+            document.execCommand('copy');
+            
+            // Show copy message
+            const copyMessage = document.getElementById('copyMessage');
+            copyMessage.style.opacity = "1";
+            
+            // Replace alert with a non-blocking notification
+            const button = document.querySelector('button[onclick="copyLink()"]');
+            const originalText = button.textContent;
+            button.textContent = "Copied!";
+            button.style.backgroundColor = "#004400";
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = "";
+                copyMessage.style.opacity = "0";
+            }, 2000);
+            
+            // Add feedback on the input field as well
+            shareLinkInput.style.backgroundColor = "#004400";
+            setTimeout(() => {
+                shareLinkInput.style.backgroundColor = "";
+            }, 2000);
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            form.style.display = 'flex';
+            shareSection.style.display = 'none';
+            emailInput.value = '';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const referralCode = urlParams.get('ref');
+                
+                const response = await fetch('/join', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        referralCode
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.status === 409) {
+                    // Existing user
+                    localStorage.setItem('user', JSON.stringify({
+                        email: emailInput.value,
+                        referralCode: data.referralCode,
+                        username: data.username,
+                        score: data.score
+                    }));
+                    showUserDashboard(data);
+                    alert('Welcome back! Here is your referral link.');
+                } else if (!response.ok) {
+                    throw new Error(data.error);
+                } else {
+                    // New user
+                    const userData = {
+                        email: emailInput.value,
+                        referralCode: data.referralCode,
+                        username: data.username,
+                        score: INITIAL_SCORE + (referralCode ? REFERRED_BONUS : 0)
+                    };
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    showUserDashboard(userData);
+                }
+            } catch (error) {
+                alert(error.message || 'An error occurred');
+            }
+        });
+
+        // Update both leaderboard and score periodically
+        setInterval(() => {
+            updateLeaderboard();
+            updateUserScore();
+        }, 10000);
+        
+        // Initial update
+        updateLeaderboard();
+    </script>
+</body>
+</html>

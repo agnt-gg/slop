@@ -1,0 +1,8 @@
+{
+  "name": "i-love-slop-dot-com",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7"
+  }
+}
