@@ -21,6 +21,7 @@ const IGNORED_ITEMS = [
   'package-lock.json',
   '.gitignore',
   '.git',
+  '.env',
   'typescript',
   'utilities',
   'LICENSE',
