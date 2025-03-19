@@ -30,7 +30,7 @@ BALLS is designed to help developers and teams:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/slop.git
+git clone https://github.com/agnt-gg/slop
 cd slop/utilities/batch-aggregator-for-llm-systems
 ```
 
