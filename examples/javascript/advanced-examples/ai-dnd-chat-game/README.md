@@ -11,7 +11,7 @@
 
 AI Quest is an immersive, text-based D&D-style adventure game powered by AI! Your digital Dungeon Master uses the latest in large language model technology to create dynamic, responsive storytelling that adapts to your choices and dice rolls.
 
-Built using the [SLOP protocol](https://github.com/agentprotocol/SLOP) (Simple Language Open Protocol), this project demonstrates how AI can be used to create engaging interactive experiences with minimal complexity.
+Built using the [SLOP protocol](https://github.com/agnt-gg/slop) (Simple Language Open Protocol), this project demonstrates how AI can be used to create engaging interactive experiences with minimal complexity.
 
 ## ✨ Features
 
