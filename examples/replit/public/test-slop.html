@@ -1,0 +1,456 @@
+<!doctype html>
+<html>
+  <head>
+    <title>SLOP Endpoint Tester</title>
+    <style>
+      body {
+        font-family: Arial;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+      }
+      .endpoint-section {
+        margin-bottom: 30px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .endpoint-title {
+        background: #3498db;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      textarea,
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        padding: 8px 15px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+      }
+      button:hover {
+        background: #2980b9;
+      }
+      pre {
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        overflow: auto;
+        margin-top: 10px;
+      }
+      .response {
+        background: #eaffea;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+      .error {
+        background: #ffeeee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SLOP Protocol Endpoint Tester</h1>
+    <p>
+      Use this interface to test all SLOP protocol endpoints implemented in this
+      server.
+    </p>
+
+    <!-- Chat Endpoint -->
+    <div class="endpoint-section">
+      <h2 class="endpoint-title">1. POST /chat - Talk to Triviabot</h2>
+      <textarea
+        id="chat-message"
+        rows="3"
+        placeholder="Type your message..."
+      ></textarea>
+      <button onclick="testChat()">Send Message</button>
+      <div id="chat-response" class="response"></div>
+    </div>
+
+    <!-- Tools Endpoint -->
+    <div class="endpoint-section">
+      <h2 class="endpoint-title">2. Tools API</h2>
+      <h3>GET /tools - List available tools</h3>
+      <button onclick="getTools()">List Tools</button>
+      <div id="tools-response" class="response"></div>
+
+      <h3>POST /tools/:tool_id - Use a specific tool</h3>
+      <select id="tool-id">
+        <option value="trivia">trivia</option>
+        <option value="hint">hint</option>
+        <option value="score">score</option>
+      </select>
+      <button onclick="useTool()">Use Tool</button>
+      <div id="tool-response" class="response"></div>
+    </div>
+
+    <!-- Memory Endpoint -->
+    <div class="endpoint-section">
+      <h2 class="endpoint-title">3. Memory API</h2>
+      <h3>POST /memory - Store data</h3>
+      <input type="text" id="memory-key" placeholder="Key" />
+      <input type="text" id="memory-value" placeholder="Value" />
+      <button onclick="storeMemory()">Store</button>
+      <div id="store-memory-response" class="response"></div>
+
+      <h3>GET /memory/:key - Get value by key</h3>
+      <input type="text" id="get-memory-key" placeholder="Key" />
+      <button onclick="getMemory()">Get</button>
+      <div id="get-memory-response" class="response"></div>
+
+      <h3>GET /memory - List all keys</h3>
+      <button onclick="listMemory()">List Keys</button>
+      <div id="list-memory-response" class="response"></div>
+    </div>
+
+    <!-- Resources Endpoint -->
+    <div class="endpoint-section">
+      <h2 class="endpoint-title">4. Resources API</h2>
+      <h3>GET /resources - List available resources</h3>
+      <button onclick="listResources()">List Resources</button>
+      <div id="resources-response" class="response"></div>
+
+      <h3>GET /resources/:id - Get a specific resource</h3>
+      <select id="resource-id">
+        <option value="trivia-questions">trivia-questions</option>
+        <option value="commands">commands</option>
+        <option value="rick">rick</option>
+      </select>
+      <button onclick="getResource()">Get Resource</button>
+      <div id="resource-response" class="response"></div>
+
+      <h3>GET /resources/search?q=query - Search resources</h3>
+      <input type="text" id="resource-query" placeholder="Search Query" />
+      <button onclick="searchResources()">Search</button>
+      <div id="search-resources-response" class="response"></div>
+
+      <h3>POST /resources - Create a new resource</h3>
+      <input type="text" id="new-resource-id" placeholder="Resource ID" />
+      <input type="text" id="new-resource-title" placeholder="Resource Title" />
+      <input
+        type="text"
+        id="new-resource-content"
+        placeholder="Resource Content"
+      />
+      <input
+        type="text"
+        id="new-resource-type"
+        placeholder="Resource Type (optional)"
+      />
+      <button onclick="createResource()">Create Resource</button>
+      <div id="create-resource-response" class="response"></div>
+
+      <h3>PUT /resources/:id - Update a resource</h3>
+      <input type="text" id="update-resource-id" placeholder="Resource ID" />
+      <input type="text" id="update-resource-title" placeholder="New Title" />
+      <input
+        type="text"
+        id="update-resource-content"
+        placeholder="New Content"
+      />
+      <input
+        type="text"
+        id="update-resource-type"
+        placeholder="New Type (optional)"
+      />
+      <button onclick="updateResource()">Update Resource</button>
+      <div id="update-resource-response" class="response"></div>
+    </div>
+
+    <!-- Pay Endpoint -->
+    <div class="endpoint-section">
+      <h2 class="endpoint-title">5. Pay API</h2>
+      <h3>POST /pay - Create a payment</h3>
+      <input type="text" id="pay-amount" placeholder="Amount (e.g. 10)" />
+      <input
+        type="text"
+        id="pay-currency"
+        placeholder="Currency (e.g. USD)"
+        value="USD"
+      />
+      <input
+        type="text"
+        id="pay-description"
+        placeholder="Description"
+        value="Test payment"
+      />
+      <button onclick="createPayment()">Pay</button>
+      <div id="pay-response" class="response"></div>
+
+      <h3>GET /pay/:id - Get payment status</h3>
+      <input type="text" id="pay-id" placeholder="Transaction ID" />
+      <button onclick="getPayment()">Get Status</button>
+      <div id="payment-status-response" class="response"></div>
+    </div>
+
+    <script>
+      // Helper function to display responses
+      function displayResponse(elementId, data, isError = false) {
+        const element = document.getElementById(elementId);
+        element.innerHTML =
+          typeof data === "object"
+            ? `<pre>${JSON.stringify(data, null, 2)}</pre>`
+            : data;
+        element.className = isError ? "response error" : "response";
+      }
+
+      // 1. Chat API
+      async function testChat() {
+        try {
+          const message = document.getElementById("chat-message").value;
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: message }],
+            }),
+          });
+          const data = await response.json();
+          displayResponse("chat-response", data);
+        } catch (error) {
+          displayResponse("chat-response", `Error: ${error.message}`, true);
+        }
+      }
+
+      // 2. Tools API
+      async function getTools() {
+        try {
+          const response = await fetch("/tools");
+          const data = await response.json();
+          displayResponse("tools-response", data);
+        } catch (error) {
+          displayResponse("tools-response", `Error: ${error.message}`, true);
+        }
+      }
+
+      async function useTool() {
+        try {
+          const toolId = document.getElementById("tool-id").value;
+          const response = await fetch(`/tools/${toolId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "execute" }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+          }
+
+          const data = await response.json();
+          displayResponse("tool-response", data);
+        } catch (error) {
+          displayResponse("tool-response", `Error: ${error.message}`, true);
+        }
+      }
+
+      // 3. Memory API
+      async function storeMemory() {
+        try {
+          const key = document.getElementById("memory-key").value;
+          const value = document.getElementById("memory-value").value;
+          const response = await fetch("/memory", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key, value }),
+          });
+          const data = await response.json();
+          displayResponse("store-memory-response", data);
+        } catch (error) {
+          displayResponse(
+            "store-memory-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      async function getMemory() {
+        try {
+          const key = document.getElementById("get-memory-key").value;
+          const response = await fetch(`/memory/${encodeURIComponent(key)}`);
+          const data = await response.json();
+          displayResponse("get-memory-response", data);
+        } catch (error) {
+          displayResponse(
+            "get-memory-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      async function listMemory() {
+        try {
+          const response = await fetch("/memory");
+          const data = await response.json();
+          displayResponse("list-memory-response", data);
+        } catch (error) {
+          displayResponse(
+            "list-memory-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      // 4. Resources API
+      async function listResources() {
+        try {
+          const response = await fetch("/resources");
+          const data = await response.json();
+          displayResponse("resources-response", data);
+        } catch (error) {
+          displayResponse(
+            "resources-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      async function getResource() {
+        try {
+          const resourceId = document.getElementById("resource-id").value;
+          const response = await fetch(`/resources/${resourceId}`);
+          const data = await response.json();
+          displayResponse("resource-response", data);
+        } catch (error) {
+          displayResponse("resource-response", `Error: ${error.message}`, true);
+        }
+      }
+
+      async function searchResources() {
+        try {
+          const query = document.getElementById("resource-query").value;
+          const response = await fetch(
+            `/resources/search?q=${encodeURIComponent(query)}`,
+          );
+          const data = await response.json();
+          displayResponse("search-resources-response", data);
+        } catch (error) {
+          displayResponse(
+            "search-resources-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      // 5. Pay API
+      async function createPayment() {
+        try {
+          const amount =
+            parseFloat(document.getElementById("pay-amount").value) || 0;
+          const currency = document.getElementById("pay-currency").value;
+          const description = document.getElementById("pay-description").value;
+
+          const response = await fetch("/pay", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount, currency, description }),
+          });
+          const data = await response.json();
+          // Save transaction ID for later use
+          document.getElementById("pay-id").value = data.transaction_id;
+          displayResponse("pay-response", data);
+        } catch (error) {
+          displayResponse("pay-response", `Error: ${error.message}`, true);
+        }
+      }
+
+      async function getPayment() {
+        try {
+          const transactionId = document.getElementById("pay-id").value;
+          const response = await fetch(`/pay/${transactionId}`);
+          const data = await response.json();
+          displayResponse("payment-status-response", data);
+        } catch (error) {
+          displayResponse(
+            "payment-status-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      async function createResource() {
+        try {
+          const id = document.getElementById("new-resource-id").value;
+          const title = document.getElementById("new-resource-title").value;
+          const content = document.getElementById("new-resource-content").value;
+          const type = document.getElementById("new-resource-type").value;
+
+          const response = await fetch("/resources", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id,
+              title,
+              content,
+              type: type || "custom",
+            }),
+          });
+          const data = await response.json();
+          displayResponse("create-resource-response", data);
+        } catch (error) {
+          displayResponse(
+            "create-resource-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+
+      async function updateResource() {
+        try {
+          const id = document.getElementById("update-resource-id").value;
+          const title = document.getElementById("update-resource-title").value;
+          const content = document.getElementById(
+            "update-resource-content",
+          ).value;
+          const type = document.getElementById("update-resource-type").value;
+
+          const response = await fetch(`/resources/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              content,
+              type: type || undefined,
+            }),
+          });
+          const data = await response.json();
+          displayResponse("update-resource-response", data);
+        } catch (error) {
+          displayResponse(
+            "update-resource-response",
+            `Error: ${error.message}`,
+            true,
+          );
+        }
+      }
+    </script>
+
+    <p style="margin-top: 30px; text-align: center">
+      <a href="/" style="color: #3498db">Back to main page</a>
+    </p>
+  </body>
+</html>
